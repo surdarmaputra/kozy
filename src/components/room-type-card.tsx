@@ -27,7 +27,7 @@ export function RoomTypeCard({
     <article className="flex flex-col overflow-hidden rounded-xl border border-border bg-card">
       <Photo
         src={tipe.foto}
-        alt={`Kamar tipe ${tipe.nama} di ${lokasi.nama}`}
+        alt={`${tipe.nama} room at ${lokasi.nama}`}
         width={900}
         className="h-44 w-full"
       />
@@ -48,7 +48,7 @@ export function RoomTypeCard({
               ? formatRupiah(tipe.hargaMin)
               : `${formatRupiah(tipe.hargaMin)}+`}
             <span className="block text-xs font-medium text-muted-foreground">
-              per bulan
+              per month
             </span>
           </p>
         </div>
@@ -63,7 +63,7 @@ export function RoomTypeCard({
             {tipe.kosong}
           </span>{' '}
           <span className="text-muted-foreground">
-            dari <span className="num">{tipe.rooms.length}</span> kamar kosong
+            of <span className="num">{tipe.rooms.length}</span> rooms available
           </span>
         </p>
 
@@ -99,15 +99,15 @@ export function RoomTypeCard({
               rel="noreferrer"
             >
               <MessageCircle className="size-4" aria-hidden />
-              Chat WhatsApp
+              Chat on WhatsApp
             </a>
           </Button>
           <Button asChild variant="outline" className="h-11 flex-1">
             <Link
-              to="/lokasi/$slug/tipe/$tipe"
-              params={{ slug: lokasi.slug, tipe: tipe.slug }}
+              to="/locations/$slug/type/$type"
+              params={{ slug: lokasi.slug, type: tipe.slug }}
             >
-              Lihat denah
+              Room map
             </Link>
           </Button>
         </div>

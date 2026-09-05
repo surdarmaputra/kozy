@@ -42,7 +42,7 @@ Kartu tipe baru langsung muncul di halaman lokasi.
    Kolom `nomor_wa` boleh dikosongkan kalau memakai nomor utama.
 3. Tab `kamar`, tambah baris kamarnya. Kolom `lokasi_slug` pilih dari dropdown.
 4. Buka bookmark **Perbarui website**.
-5. Halaman `/lokasi/sekupang` langsung ada.
+5. Halaman `/locations/sekupang` langsung ada.
 
 ## 5. Menyembunyikan lokasi atau kamar
 
@@ -59,12 +59,9 @@ Datanya tetap tersimpan dan bisa ditampilkan lagi kapan saja.
 
 Buka bookmark **Perbarui website**. Halaman itu menyebutkan:
 
-- **Sumber data**: harus tertulis "Google Sheet". Kalau tertulis
-  "Snapshot cadangan", berarti website tidak bisa membaca Sheet. Cek
-  File > Share, pastikan masih **Anyone with the link, Viewer**.
-- **Terbaca**: jumlah lokasi dan kamar yang berhasil dibaca.
-- **Baris yang dilewati**: nomor baris yang datanya belum lengkap.
-  Perbaiki baris itu di Sheet, lalu buka bookmark lagi.
+- **Data source**: harus tertulis "Google Sheet". Kalau tertulis "Committed snapshot", berarti website tidak bisa membaca Sheet. Cek File > Share, pastikan masih **Anyone with the link, Viewer**.
+- **Read**: jumlah lokasi dan kamar yang berhasil dibaca.
+- **Baris yang dilewati**: nomor baris yang datanya belum lengkap. Perbaiki baris itu di Sheet, lalu buka bookmark lagi.
 
 Website tidak pernah kosong. Kalau Sheet bermasalah, yang tampil adalah
 data terakhir yang tersimpan di kode.

@@ -30,18 +30,18 @@ export const purgeSheetCache = createServerFn({ method: 'GET' })
     if (!expected) {
       return {
         ok: false,
-        message: 'Purge belum aktif',
+        message: 'Purge is not switched on yet',
         detail:
-          'Variabel PURGE_SECRET belum diisi di Netlify. Minta developer mengisinya sekali, setelah itu tombol ini bekerja selamanya.',
+          'The PURGE_SECRET variable is empty on Netlify. Ask a developer to set it once and this page works from then on.',
       }
     }
 
     if (data.secret !== expected) {
       return {
         ok: false,
-        message: 'Kode rahasia salah',
+        message: 'Wrong secret',
         detail:
-          'Buka lagi lewat bookmark yang diberikan saat handover, jangan diketik manual.',
+          'Open it again from the bookmark you were given at handover rather than typing it by hand.',
       }
     }
 
@@ -70,17 +70,17 @@ export const purgeSheetCache = createServerFn({ method: 'GET' })
     if (cdnError) {
       return {
         ok: true,
-        message: 'Cache lokal dibersihkan',
-        detail: `Cache CDN tidak tersedia di lingkungan ini (${cdnError}).`,
+        message: 'Local cache cleared',
+        detail: `No CDN cache is reachable in this environment (${cdnError}).`,
         diagnostics,
       }
     }
 
     return {
       ok: true,
-      message: 'Website sudah diperbarui',
+      message: 'The website is up to date',
       detail:
-        'Buka halaman lokasi dan tarik ke bawah untuk refresh. Perubahan langsung terlihat.',
+        'Open a location page and pull down to refresh. The change is visible straight away.',
       diagnostics,
     }
   })

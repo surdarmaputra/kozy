@@ -5,6 +5,6 @@ const rupiah = new Intl.NumberFormat('id-ID', {
 })
 
 export function formatRupiah(value: number): string {
-  if (!Number.isFinite(value) || value <= 0) return 'Hubungi kami'
+  if (!Number.isFinite(value) || value <= 0) return 'Ask us'
   return rupiah.format(value).replace(/\s/g, ' ')
 }

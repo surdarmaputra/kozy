@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { Button } from '#/components/ui/button'
 import { purgeSheetCache } from '#/lib/catalog'
 
-/** Bookmarked by the client and opened from a phone right after they edit the
+/** Bookmarked by the owner and opened from a phone right after they edit the
  *  Sheet, so the page answers in words, not JSON. */
 export const Route = createFileRoute('/purge')({
   validateSearch: z.object({ secret: z.string().default('') }),
@@ -17,7 +17,7 @@ export const Route = createFileRoute('/purge')({
   }),
   head: () => ({
     meta: [
-      { title: 'Perbarui website' },
+      { title: 'Refresh the website' },
       { name: 'robots', content: 'noindex' },
     ],
   }),
@@ -48,18 +48,18 @@ function Purge() {
         {result.diagnostics ? (
           <dl className="mt-7 grid grid-cols-2 gap-x-6 gap-y-4 border-t border-border pt-6 text-sm">
             <div>
-              <dt className="text-muted-foreground">Sumber data</dt>
+              <dt className="text-muted-foreground">Data source</dt>
               <dd className="mt-0.5 font-semibold">
                 {result.diagnostics.source === 'sheet'
                   ? 'Google Sheet'
-                  : 'Snapshot cadangan'}
+                  : 'Committed snapshot'}
               </dd>
             </div>
             <div>
-              <dt className="text-muted-foreground">Terbaca</dt>
+              <dt className="text-muted-foreground">Read</dt>
               <dd className="num mt-0.5 font-semibold">
-                {result.diagnostics.lokasi} lokasi, {result.diagnostics.kamar}{' '}
-                kamar
+                {result.diagnostics.lokasi} locations,{' '}
+                {result.diagnostics.kamar} rooms
               </dd>
             </div>
           </dl>
@@ -68,7 +68,7 @@ function Purge() {
         {result.diagnostics && result.diagnostics.skipped.length > 0 ? (
           <div className="mt-6 rounded-lg bg-status-dibooking-surface p-4">
             <p className="text-sm font-semibold text-status-dibooking">
-              Baris berikut dilewati karena datanya belum lengkap
+              These rows were skipped because their data is incomplete
             </p>
             <ul className="mt-2 space-y-1 text-sm text-status-dibooking">
               {result.diagnostics.skipped.slice(0, 8).map((item) => (
@@ -79,7 +79,7 @@ function Purge() {
         ) : null}
 
         <Button asChild className="mt-8 h-11 w-full">
-          <Link to="/">Buka website</Link>
+          <Link to="/">Open the website</Link>
         </Button>
       </div>
     </main>

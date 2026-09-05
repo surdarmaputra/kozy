@@ -18,7 +18,7 @@ export function LocationCard({
 
   return (
     <Link
-      to="/lokasi/$slug"
+      to="/locations/$slug"
       params={{ slug: lokasi.slug }}
       className={cn(
         'group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card',
@@ -35,7 +35,7 @@ export function LocationCard({
       >
         <Photo
           src={lokasi.foto_urls[0] ?? ''}
-          alt={`Suasana ${lokasi.nama}`}
+          alt={`${lokasi.nama} building`}
           width={wide ? 1200 : 900}
           priority
           className={cn(
@@ -68,16 +68,16 @@ export function LocationCard({
 
         <dl className="flex flex-wrap items-end gap-x-8 gap-y-3">
           <div>
-            <dt className="text-xs text-muted-foreground">Mulai dari</dt>
+            <dt className="text-xs text-muted-foreground">From</dt>
             <dd className="num mt-0.5 text-lg font-bold">
               {formatRupiah(lokasi.hargaMulai)}
               <span className="ml-1 text-xs font-medium text-muted-foreground">
-                /bulan
+                /month
               </span>
             </dd>
           </div>
           <div>
-            <dt className="text-xs text-muted-foreground">Kamar kosong</dt>
+            <dt className="text-xs text-muted-foreground">Available</dt>
             <dd
               className={cn(
                 'num mt-0.5 text-lg font-bold',
@@ -86,14 +86,14 @@ export function LocationCard({
             >
               {lokasi.kamarKosong}
               <span className="ml-1 text-xs font-medium text-muted-foreground">
-                dari {lokasi.kamarTotal}
+                of {lokasi.kamarTotal}
               </span>
             </dd>
           </div>
         </dl>
 
         <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary">
-          Lihat kamar
+          View rooms
           <span
             aria-hidden
             className="transition-transform group-hover:translate-x-0.5"

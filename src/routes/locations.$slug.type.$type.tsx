@@ -12,20 +12,20 @@ import { sheetCacheHeaders } from '#/lib/http'
 import { activeLokasi, findLokasi, findRoomType, roomsFor } from '#/lib/select'
 import { waLinkForType } from '#/lib/wa'
 
-export const Route = createFileRoute('/lokasi/$slug/tipe/$tipe')({
+export const Route = createFileRoute('/locations/$slug/type/$type')({
   loader: () => loadCatalog(),
   headers: () => sheetCacheHeaders,
   head: ({ loaderData, params }) => {
     const brand = loaderData?.config.brand ?? 'Kozy'
     const lokasi = loaderData ? findLokasi(loaderData, params.slug) : undefined
     const tipe = loaderData
-      ? findRoomType(loaderData, params.slug, params.tipe)
+      ? findRoomType(loaderData, params.slug, params.type)
       : undefined
     if (!lokasi || !tipe)
-      return { meta: [{ title: `Tipe kamar tidak ditemukan | ${brand}` }] }
+      return { meta: [{ title: `Room type not found | ${brand}` }] }
 
-    const title = `Kamar ${tipe.nama} di ${lokasi.nama}`
-    const description = `${tipe.kosong} dari ${tipe.rooms.length} kamar tipe ${tipe.nama} kosong. Luas ${tipe.luasMin} m², mulai ${formatRupiah(tipe.hargaMin)} per bulan di ${lokasi.alamat}.`
+    const title = `${tipe.nama} rooms at ${lokasi.nama}`
+    const description = `${tipe.kosong} of ${tipe.rooms.length} ${tipe.nama} rooms available. ${tipe.luasMin} m², from ${formatRupiah(tipe.hargaMin)} per month at ${lokasi.alamat}.`
 
     return {
       meta: [
@@ -49,7 +49,7 @@ function TipeDetail() {
   const params = Route.useParams()
   const lokasi = findLokasi(catalog, params.slug)
   const tipe = lokasi
-    ? findRoomType(catalog, lokasi.slug, params.tipe)
+    ? findRoomType(catalog, lokasi.slug, params.type)
     : undefined
 
   if (!lokasi || !tipe) {
@@ -61,14 +61,14 @@ function TipeDetail() {
           className="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center px-4 py-24 text-center"
         >
           <h1 className="text-3xl font-bold tracking-tight">
-            Tipe kamar tidak ditemukan
+            Room type not found
           </h1>
           <p className="mt-3 leading-relaxed text-muted-foreground">
-            Tipe ini mungkin sudah dinonaktifkan. Lihat tipe kamar yang tersedia
-            sekarang.
+            This type may have been switched off. Have a look at the types
+            available now.
           </p>
           <Button asChild className="mx-auto mt-8 h-11 px-6">
-            <Link to="/">Lihat lokasi</Link>
+            <Link to="/">See locations</Link>
           </Button>
         </main>
         <SiteFooter config={catalog.config} lokasi={activeLokasi(catalog)} />
@@ -90,7 +90,7 @@ function TipeDetail() {
       <main id="konten" className="flex-1">
         <div className="mx-auto w-full max-w-6xl px-4 pt-6 sm:px-6">
           <Link
-            to="/lokasi/$slug"
+            to="/locations/$slug"
             params={{ slug: lokasi.slug }}
             className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
@@ -103,7 +103,7 @@ function TipeDetail() {
           <div className="overflow-hidden rounded-xl border border-border lg:order-2">
             <Photo
               src={tipe.foto}
-              alt={`Kamar tipe ${tipe.nama} di ${lokasi.nama}`}
+              alt={`${tipe.nama} room at ${lokasi.nama}`}
               width={1200}
               priority
               className="aspect-[4/3] w-full"
@@ -118,29 +118,29 @@ function TipeDetail() {
 
             <dl className="mt-7 flex flex-wrap gap-x-10 gap-y-5">
               <div>
-                <dt className="text-xs text-muted-foreground">Harga</dt>
+                <dt className="text-xs text-muted-foreground">Price</dt>
                 <dd className="num mt-0.5 text-2xl font-bold">
                   {tipe.hargaMin === tipe.hargaMax
                     ? formatRupiah(tipe.hargaMin)
                     : `${formatRupiah(tipe.hargaMin)}+`}
                   <span className="ml-1 text-xs font-medium text-muted-foreground">
-                    per bulan
+                    per month
                   </span>
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-muted-foreground">Luas</dt>
+                <dt className="text-xs text-muted-foreground">Size</dt>
                 <dd className="num mt-0.5 flex items-center gap-1.5 text-2xl font-bold">
                   <Ruler className="size-5 text-muted-foreground" aria-hidden />
                   {luas} m²
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-muted-foreground">Kamar kosong</dt>
+                <dt className="text-xs text-muted-foreground">Available</dt>
                 <dd className="num mt-0.5 text-2xl font-bold text-status-kosong">
                   {tipe.kosong}
                   <span className="ml-1 text-xs font-medium text-muted-foreground">
-                    dari {tipe.rooms.length}
+                    of {tipe.rooms.length}
                   </span>
                 </dd>
               </div>
@@ -171,7 +171,7 @@ function TipeDetail() {
                 rel="noreferrer"
               >
                 <MessageCircle className="size-5" aria-hidden />
-                Chat WhatsApp
+                Chat on WhatsApp
               </a>
             </Button>
           </div>
@@ -179,11 +179,11 @@ function TipeDetail() {
 
         <section className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6">
           <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
-            Posisi kamar {tipe.nama}
+            Where {tipe.nama} rooms are
           </h2>
           <p className="mt-2 max-w-xl leading-relaxed text-muted-foreground">
-            Kamar tipe lain ditampilkan samar supaya posisi tipe ini terlihat
-            jelas. Ketuk kamar yang kosong untuk membuka WhatsApp.
+            Other room types are dimmed so this one stands out. Tap an available
+            room to open WhatsApp.
           </p>
           <div className="mt-6">
             <RoomMap
@@ -198,7 +198,7 @@ function TipeDetail() {
 
       <ContactSection
         waNumber={waNumber}
-        context={`kamar ${tipe.nama} di ${lokasi.nama}`}
+        context={`${tipe.nama} rooms at ${lokasi.nama}`}
       />
       <SiteFooter config={catalog.config} lokasi={activeLokasi(catalog)} />
     </div>

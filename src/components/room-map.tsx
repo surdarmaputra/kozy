@@ -1,4 +1,4 @@
-import { StatusLegend } from '#/components/status-badge'
+import { StatusLegend, statusLabel } from '#/components/status-badge'
 import { formatRupiah } from '#/lib/format'
 import { groupByFloor, tipeSlug } from '#/lib/select'
 import { cn } from '#/lib/utils'
@@ -6,7 +6,7 @@ import { waLinkForRoom } from '#/lib/wa'
 import type { Kamar, Lokasi } from '#/lib/schema'
 
 /**
- * Denah kamar. Every room in the building at once, positioned by floor, so a
+ * Room map. Every room in the building at once, positioned by floor, so a
  * visitor reads availability the way they read a seat map: colour first, then
  * pick. Tapping a free room opens WhatsApp with that exact code.
  *
@@ -37,7 +37,7 @@ export function RoomMap({
             className="rounded-xl border border-border bg-card p-4 sm:p-5"
           >
             <p className="text-xs font-semibold text-muted-foreground">
-              Lantai <span className="num">{floor.lantai}</span>
+              Floor <span className="num">{floor.lantai}</span>
             </p>
             <ul className="mt-3 flex flex-wrap gap-2">
               {floor.rooms.map((room) => (
@@ -91,7 +91,7 @@ function RoomTile({
       <span
         className={shell}
         title={summary}
-        aria-label={`${summary} · ${room.status}`}
+        aria-label={`${summary} · ${statusLabel[room.status]}`}
       >
         <span className="num text-sm font-bold">{room.kode}</span>
         <span className="num text-[0.65rem]">{room.luas_m2} m²</span>
@@ -105,7 +105,7 @@ function RoomTile({
       target="_blank"
       rel="noreferrer"
       title={summary}
-      aria-label={`Chat WhatsApp tentang kamar ${summary}`}
+      aria-label={`Chat on WhatsApp about room ${summary}`}
       className={cn(
         shell,
         'transition-transform duration-150 hover:-translate-y-0.5 active:translate-y-0',

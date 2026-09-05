@@ -8,7 +8,7 @@ const FETCH_TIMEOUT_MS = 8000
 
 const defaultConfig: SiteConfig = {
   brand: 'Kozy',
-  tagline: 'Kamar kos siap huni',
+  tagline: 'Rooms ready to move into',
   wa_default: '',
   alamat_kantor: '',
 }
@@ -33,7 +33,7 @@ async function fetchTab(tab: string): Promise<Array<Record<string, string>>> {
   const body = await response.text()
   // A revoked share link returns a Google sign-in page with a 200.
   if (body.trimStart().startsWith('<'))
-    throw new Error(`tab "${tab}" bukan CSV, cek sharing Sheet`)
+    throw new Error(`tab "${tab}" did not return CSV, check the Sheet sharing`)
   return csvToRecords(body)
 }
 
@@ -73,7 +73,7 @@ async function readCatalog(): Promise<Catalog> {
   const skipped: Array<string> = []
 
   if (!sheetId()) {
-    skipped.push('SHEET_ID belum diisi, memakai snapshot.json')
+    skipped.push('SHEET_ID is empty, serving snapshot.json')
     return snapshotCatalog(skipped)
   }
 
@@ -93,11 +93,11 @@ async function readCatalog(): Promise<Catalog> {
     }
     // An empty sheet is indistinguishable from a broken one for a visitor,
     // so treat it as a failure and keep the snapshot on screen.
-    if (catalog.lokasi.length === 0) throw new Error('tab lokasi kosong')
+    if (catalog.lokasi.length === 0) throw new Error('the lokasi tab is empty')
     return catalog
   } catch (error) {
     skipped.push(
-      `Gagal baca Sheet: ${error instanceof Error ? error.message : String(error)}`,
+      `Could not read the Sheet: ${error instanceof Error ? error.message : String(error)}`,
     )
     return snapshotCatalog(skipped)
   }
@@ -115,7 +115,7 @@ export async function getCatalog(): Promise<Catalog> {
     return catalog
   } catch {
     if (cache) return cache.catalog
-    throw new Error('katalog tidak tersedia')
+    throw new Error('catalogue unavailable')
   }
 }
 

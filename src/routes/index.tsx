@@ -17,10 +17,10 @@ export const Route = createFileRoute('/')({
     const brand = loaderData?.config.brand ?? 'Kozy'
     const description =
       loaderData?.config.tagline ??
-      'Daftar kamar kos beserta status ketersediaannya, diperbarui langsung dari Google Sheet.'
+      'Every room and its current availability, updated straight from a Google Sheet.'
     return {
       meta: [
-        { title: `${brand} | Katalog kamar kos` },
+        { title: `${brand} | Room catalogue` },
         { name: 'description', content: description },
         { property: 'og:type', content: 'website' },
         { property: 'og:title', content: brand },
@@ -61,13 +61,13 @@ function Home() {
             <div className="mt-8">
               {single && lokasi[0] ? (
                 <Button asChild size="lg" className="h-12 px-7 text-base">
-                  <Link to="/lokasi/$slug" params={{ slug: lokasi[0].slug }}>
-                    Lihat kamar
+                  <Link to="/locations/$slug" params={{ slug: lokasi[0].slug }}>
+                    View rooms
                   </Link>
                 </Button>
               ) : (
                 <Button asChild size="lg" className="h-12 px-7 text-base">
-                  <a href="#lokasi">Lihat lokasi</a>
+                  <a href="#locations">See locations</a>
                 </Button>
               )}
             </div>
@@ -76,7 +76,7 @@ function Home() {
           <div className="overflow-hidden rounded-xl border border-border">
             <Photo
               src={heroPhoto}
-              alt={`Bangunan ${lokasi[0]?.nama ?? catalog.config.brand}`}
+              alt={`${lokasi[0]?.nama ?? catalog.config.brand} building`}
               width={1400}
               priority
               className="aspect-[4/3] w-full lg:aspect-[5/4]"
@@ -85,31 +85,31 @@ function Home() {
         </section>
 
         <section
-          aria-label="Ringkasan ketersediaan"
+          aria-label="Availability summary"
           className="border-y border-border bg-card"
         >
           <dl className="mx-auto grid w-full max-w-6xl grid-cols-3 divide-x divide-border px-4 sm:px-6">
-            <Stat label="Lokasi" value={String(lokasi.length)} />
-            <Stat label="Kamar kosong" value={String(totalKosong)} accent />
-            <Stat label="Mulai dari" value={formatRupiah(hargaTerendah)} />
+            <Stat label="Locations" value={String(lokasi.length)} />
+            <Stat label="Rooms available" value={String(totalKosong)} accent />
+            <Stat label="From" value={formatRupiah(hargaTerendah)} />
           </dl>
         </section>
 
         <section
-          id="lokasi"
+          id="locations"
           className="mx-auto w-full max-w-6xl scroll-mt-20 px-4 py-16 sm:px-6 sm:py-20"
         >
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            {single ? 'Lokasi' : 'Pilih lokasi'}
+            {single ? 'Location' : 'Choose a location'}
           </h2>
           <p className="mt-3 max-w-xl leading-relaxed text-muted-foreground">
-            Nomor WhatsApp bisa berbeda per lokasi. Tombol chat di tiap halaman
-            sudah mengarah ke nomor yang benar.
+            The WhatsApp number can differ per location. Every chat button on
+            the site already points at the right one.
           </p>
 
           {lokasi.length === 0 ? (
             <p className="mt-10 rounded-xl border border-dashed border-border bg-card px-6 py-12 text-center text-sm text-muted-foreground">
-              Data lokasi belum tersedia. Silakan coba beberapa saat lagi.
+              No location data yet. Please try again in a moment.
             </p>
           ) : (
             <div
@@ -124,7 +124,7 @@ function Home() {
 
         <section className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6 sm:pb-20">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Cara sewa
+            How it works
           </h2>
           <ol className="mt-10 max-w-2xl">
             {steps.map((step) => (
@@ -150,16 +150,16 @@ function Home() {
 
 const steps = [
   {
-    title: 'Buka halaman lokasi',
-    body: 'Alamat, fasilitas umum, peta, dan denah kamar ada di satu halaman.',
+    title: 'Open a location page',
+    body: 'The address, shared facilities, the map, and the room map all sit on one page.',
   },
   {
-    title: 'Baca denah kamarnya',
-    body: 'Warna tiap kamar menunjukkan yang kosong, yang sedang dibooking, dan yang terisi.',
+    title: 'Read the room map',
+    body: 'Each room is coloured by state: available, reserved, or occupied.',
   },
   {
-    title: 'Ketuk kamar yang kosong',
-    body: 'WhatsApp terbuka dengan kode kamar, tipe, dan harganya sudah tertulis di pesan.',
+    title: 'Tap an available room',
+    body: 'WhatsApp opens with the room code, its type, and its price already written in the message.',
   },
 ]
 

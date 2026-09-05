@@ -25,8 +25,8 @@ export function RoomTypeList({
   if (types.length === 0) {
     return (
       <EmptyState
-        title="Belum ada kamar terdaftar"
-        body="Data kamar untuk lokasi ini belum diisi. Kirim pesan WhatsApp untuk ketersediaan terbaru."
+        title="No rooms listed yet"
+        body="Room data for this location has not been filled in yet. Send a WhatsApp message for current availability."
       />
     )
   }
@@ -36,27 +36,27 @@ export function RoomTypeList({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
-            Tipe kamar
+            Room types
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Kamar dengan tipe sama punya harga, luas, dan fasilitas yang sama.
+            Rooms of the same type share a price, a size, and a facility list.
           </p>
         </div>
         <label className="flex cursor-pointer items-center gap-3 self-start rounded-lg border border-border bg-card px-4 py-2.5 sm:self-auto">
           <Switch
             checked={onlyAvailable}
             onCheckedChange={setOnlyAvailable}
-            aria-label="Tampilkan tipe yang masih ada kamar kosong"
+            aria-label="Show only types with an available room"
           />
-          <span className="text-sm font-medium">Yang masih kosong</span>
+          <span className="text-sm font-medium">Available only</span>
         </label>
       </div>
 
       {visible.length === 0 ? (
         <div className="mt-8">
           <EmptyState
-            title="Semua kamar sedang terisi"
-            body="Matikan filter untuk melihat seluruh tipe, atau kirim pesan supaya dikabari saat ada yang kosong."
+            title="Every room is taken"
+            body="Turn the filter off to see every type, or send a message and we will tell you when one frees up."
           />
         </div>
       ) : (

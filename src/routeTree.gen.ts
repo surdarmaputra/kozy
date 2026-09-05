@@ -11,8 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PurgeRouteImport } from './routes/purge'
-import { Route as LokasiSlugIndexRouteImport } from './routes/lokasi.$slug.index'
-import { Route as LokasiSlugTipeTipeRouteImport } from './routes/lokasi.$slug.tipe.$tipe'
+import { Route as LocationsSlugIndexRouteImport } from './routes/locations.$slug.index'
+import { Route as LocationsSlugTypeTypeRouteImport } from './routes/locations.$slug.type.$type'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -24,50 +24,55 @@ const PurgeRoute = PurgeRouteImport.update({
   path: '/purge',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LokasiSlugIndexRoute = LokasiSlugIndexRouteImport.update({
-  id: '/lokasi/$slug/',
-  path: '/lokasi/$slug/',
+const LocationsSlugIndexRoute = LocationsSlugIndexRouteImport.update({
+  id: '/locations/$slug/',
+  path: '/locations/$slug/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LokasiSlugTipeTipeRoute = LokasiSlugTipeTipeRouteImport.update({
-  id: '/lokasi/$slug/tipe/$tipe',
-  path: '/lokasi/$slug/tipe/$tipe',
+const LocationsSlugTypeTypeRoute = LocationsSlugTypeTypeRouteImport.update({
+  id: '/locations/$slug/type/$type',
+  path: '/locations/$slug/type/$type',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/purge': typeof PurgeRoute
-  '/lokasi/$slug/': typeof LokasiSlugIndexRoute
-  '/lokasi/$slug/tipe/$tipe': typeof LokasiSlugTipeTipeRoute
+  '/locations/$slug/': typeof LocationsSlugIndexRoute
+  '/locations/$slug/type/$type': typeof LocationsSlugTypeTypeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/purge': typeof PurgeRoute
-  '/lokasi/$slug': typeof LokasiSlugIndexRoute
-  '/lokasi/$slug/tipe/$tipe': typeof LokasiSlugTipeTipeRoute
+  '/locations/$slug': typeof LocationsSlugIndexRoute
+  '/locations/$slug/type/$type': typeof LocationsSlugTypeTypeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/purge': typeof PurgeRoute
-  '/lokasi/$slug/': typeof LokasiSlugIndexRoute
-  '/lokasi/$slug/tipe/$tipe': typeof LokasiSlugTipeTipeRoute
+  '/locations/$slug/': typeof LocationsSlugIndexRoute
+  '/locations/$slug/type/$type': typeof LocationsSlugTypeTypeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/purge' | '/lokasi/$slug/' | '/lokasi/$slug/tipe/$tipe'
+  fullPaths:
+    '/' | '/purge' | '/locations/$slug/' | '/locations/$slug/type/$type'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/purge' | '/lokasi/$slug' | '/lokasi/$slug/tipe/$tipe'
+  to: '/' | '/purge' | '/locations/$slug' | '/locations/$slug/type/$type'
   id:
-    '__root__' | '/' | '/purge' | '/lokasi/$slug/' | '/lokasi/$slug/tipe/$tipe'
+    | '__root__'
+    | '/'
+    | '/purge'
+    | '/locations/$slug/'
+    | '/locations/$slug/type/$type'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PurgeRoute: typeof PurgeRoute
-  LokasiSlugIndexRoute: typeof LokasiSlugIndexRoute
-  LokasiSlugTipeTipeRoute: typeof LokasiSlugTipeTipeRoute
+  LocationsSlugIndexRoute: typeof LocationsSlugIndexRoute
+  LocationsSlugTypeTypeRoute: typeof LocationsSlugTypeTypeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -86,18 +91,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PurgeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lokasi/$slug/': {
-      id: '/lokasi/$slug/'
-      path: '/lokasi/$slug'
-      fullPath: '/lokasi/$slug/'
-      preLoaderRoute: typeof LokasiSlugIndexRouteImport
+    '/locations/$slug/': {
+      id: '/locations/$slug/'
+      path: '/locations/$slug'
+      fullPath: '/locations/$slug/'
+      preLoaderRoute: typeof LocationsSlugIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lokasi/$slug/tipe/$tipe': {
-      id: '/lokasi/$slug/tipe/$tipe'
-      path: '/lokasi/$slug/tipe/$tipe'
-      fullPath: '/lokasi/$slug/tipe/$tipe'
-      preLoaderRoute: typeof LokasiSlugTipeTipeRouteImport
+    '/locations/$slug/type/$type': {
+      id: '/locations/$slug/type/$type'
+      path: '/locations/$slug/type/$type'
+      fullPath: '/locations/$slug/type/$type'
+      preLoaderRoute: typeof LocationsSlugTypeTypeRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -106,8 +111,8 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PurgeRoute: PurgeRoute,
-  LokasiSlugIndexRoute: LokasiSlugIndexRoute,
-  LokasiSlugTipeTipeRoute: LokasiSlugTipeTipeRoute,
+  LocationsSlugIndexRoute: LocationsSlugIndexRoute,
+  LocationsSlugTypeTypeRoute: LocationsSlugTypeTypeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

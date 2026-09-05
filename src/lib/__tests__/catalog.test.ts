@@ -77,7 +77,7 @@ describe('parseRows', () => {
     )
     expect(result.map((item) => item.slug)).toEqual(['seturan', 'pogung'])
     expect(skipped).toHaveLength(1)
-    expect(skipped[0]).toContain('baris 3')
+    expect(skipped[0]).toContain('row 3')
   })
 })
 

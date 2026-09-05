@@ -52,7 +52,7 @@ denah kamar.
 ### Aturan penting soal `tipe`
 
 Kolom `tipe` adalah yang mengelompokkan kamar menjadi kartu tipe kamar dan
-halaman `/lokasi/{slug}/tipe/{tipe}`. Karena itu:
+halaman `/locations/{slug}/type/{tipe}`. Karena itu:
 
 - **Tulis sama persis** untuk kamar yang setipe. `Deluxe AC` dan `deluxe ac`
   dianggap tipe yang sama, tetapi `Deluxe AC` dan `Deluxe A/C` menjadi dua tipe.

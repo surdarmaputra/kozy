@@ -12,19 +12,18 @@ import { formatRupiah } from '#/lib/format'
 import { sheetCacheHeaders } from '#/lib/http'
 import { activeLokasi, findLokasi, roomTypesFor, roomsFor } from '#/lib/select'
 
-export const Route = createFileRoute('/lokasi/$slug/')({
+export const Route = createFileRoute('/locations/$slug/')({
   loader: () => loadCatalog(),
   headers: () => sheetCacheHeaders,
   head: ({ loaderData, params }) => {
     const lokasi = loaderData ? findLokasi(loaderData, params.slug) : undefined
     const brand = loaderData?.config.brand ?? 'Kozy'
-    if (!lokasi)
-      return { meta: [{ title: `Lokasi tidak ditemukan | ${brand}` }] }
+    if (!lokasi) return { meta: [{ title: `Location not found | ${brand}` }] }
 
     const rooms = loaderData ? roomsFor(loaderData, lokasi.slug) : []
     const kosong = rooms.filter((room) => room.status === 'kosong').length
-    const title = `${lokasi.nama} | Kos dekat ${lokasi.alamat.split(',')[0]}`
-    const description = `${kosong} kamar kosong di ${lokasi.nama}, ${lokasi.alamat}. Lihat denah kamar, harga, dan fasilitas tiap tipe, lalu chat lewat WhatsApp.`
+    const title = `${lokasi.nama} | Rooms near ${lokasi.alamat.split(',')[0]}`
+    const description = `${kosong} rooms available at ${lokasi.nama}, ${lokasi.alamat}. See the room map, prices, and facilities for every type, then chat on WhatsApp.`
 
     return {
       meta: [
@@ -57,14 +56,14 @@ function LokasiDetail() {
           className="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center px-4 py-24 text-center"
         >
           <h1 className="text-3xl font-bold tracking-tight">
-            Lokasi tidak ditemukan
+            Location not found
           </h1>
           <p className="mt-3 leading-relaxed text-muted-foreground">
-            Halaman ini mungkin sudah dinonaktifkan. Lihat daftar lokasi yang
-            sedang menerima penyewa.
+            This page may have been switched off. Have a look at the locations
+            currently taking tenants.
           </p>
           <Button asChild className="mx-auto mt-8 h-11 px-6">
-            <Link to="/">Lihat lokasi</Link>
+            <Link to="/">See locations</Link>
           </Button>
         </main>
         <SiteFooter config={catalog.config} lokasi={activeLokasi(catalog)} />
@@ -93,7 +92,7 @@ function LokasiDetail() {
             className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeft className="size-4" aria-hidden />
-            Semua lokasi
+            All locations
           </Link>
         </div>
 
@@ -111,17 +110,19 @@ function LokasiDetail() {
 
             <dl className="flex shrink-0 gap-8">
               <div>
-                <dt className="text-xs text-muted-foreground">Mulai dari</dt>
+                <dt className="text-xs text-muted-foreground">From</dt>
                 <dd className="num mt-0.5 text-xl font-bold sm:text-2xl">
                   {formatRupiah(hargaMulai)}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-muted-foreground">Kamar kosong</dt>
+                <dt className="text-xs text-muted-foreground">
+                  Rooms available
+                </dt>
                 <dd className="num mt-0.5 text-xl font-bold text-status-kosong sm:text-2xl">
                   {available.length}
                   <span className="ml-1 text-xs font-medium text-muted-foreground">
-                    dari {rooms.length}
+                    of {rooms.length}
                   </span>
                 </dd>
               </div>
@@ -133,7 +134,7 @@ function LokasiDetail() {
               <div className="overflow-hidden rounded-xl border border-border sm:col-span-2">
                 <Photo
                   src={gallery[0]}
-                  alt={`Bangunan ${lokasi.nama}`}
+                  alt={`${lokasi.nama} building`}
                   width={1400}
                   priority
                   className="aspect-[16/10] w-full"
@@ -148,7 +149,7 @@ function LokasiDetail() {
                     >
                       <Photo
                         src={photo}
-                        alt={`Fasilitas ${lokasi.nama} ${index + 1}`}
+                        alt={`${lokasi.nama} facility ${index + 1}`}
                         width={700}
                         className="aspect-[16/10] w-full sm:h-full"
                       />
@@ -172,7 +173,7 @@ function LokasiDetail() {
           {lokasi.fasilitas.length > 0 ? (
             <div>
               <h2 className="text-sm font-semibold text-muted-foreground">
-                Fasilitas bersama
+                Shared facilities
               </h2>
               <ul className="mt-4 grid grid-cols-1 gap-x-6 gap-y-2.5 sm:grid-cols-2 md:grid-cols-1">
                 {lokasi.fasilitas.map((item) => (
@@ -192,11 +193,11 @@ function LokasiDetail() {
         {rooms.length > 0 ? (
           <section className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6">
             <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
-              Denah kamar
+              Room map
             </h2>
             <p className="mt-2 max-w-xl leading-relaxed text-muted-foreground">
-              Ketuk kamar yang kosong untuk membuka WhatsApp dengan kode
-              kamarnya sudah tertulis.
+              Tap an available room to open WhatsApp with its room code already
+              written in.
             </p>
             <div className="mt-6">
               <RoomMap
@@ -219,11 +220,11 @@ function LokasiDetail() {
         {lokasi.lat !== 0 && lokasi.lng !== 0 ? (
           <section className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6">
             <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
-              Lokasi di peta
+              On the map
             </h2>
             <div className="mt-5 overflow-hidden rounded-xl border border-border">
               <iframe
-                title={`Peta ${lokasi.nama}`}
+                title={`Map of ${lokasi.nama}`}
                 src={`https://www.google.com/maps?q=${lokasi.lat},${lokasi.lng}&z=16&output=embed`}
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
@@ -237,7 +238,7 @@ function LokasiDetail() {
                 rel="noreferrer"
                 className="mt-4 inline-block text-sm font-medium text-primary underline-offset-4 hover:underline"
               >
-                Buka rute di Google Maps
+                Open directions in Google Maps
               </a>
             ) : null}
           </section>

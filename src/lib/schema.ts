@@ -130,7 +130,7 @@ export function parseRows<T>(
     const reason = result.error.issues
       .map((issue) => issue.path.join('.') || 'row')
       .join(', ')
-    skipped.push(`${label} baris ${index + 2}: ${reason}`)
+    skipped.push(`${label} row ${index + 2}: ${reason}`)
   })
   return parsed
 }

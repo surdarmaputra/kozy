@@ -1,10 +1,12 @@
 import { cn } from '#/lib/utils'
 import type { RoomStatus } from '#/lib/schema'
 
+/** The Sheet keeps its own vocabulary (kosong / dibooking / terisi) because the
+ *  owner types those values. The site shows the English reading of them. */
 export const statusLabel: Record<RoomStatus, string> = {
-  kosong: 'Kosong',
-  dibooking: 'Dibooking',
-  terisi: 'Terisi',
+  kosong: 'Available',
+  dibooking: 'Reserved',
+  terisi: 'Occupied',
 }
 
 const statusStyle: Record<RoomStatus, string> = {
@@ -33,8 +35,8 @@ export function StatusBadge({
   )
 }
 
-/** Reading key for the room board. Three states is few enough that a legend
- *  beats a tooltip nobody taps on a phone. */
+/** Reading key for the room map. Three states is few enough that a legend beats
+ *  a tooltip nobody taps on a phone. */
 export function StatusLegend() {
   return (
     <ul className="flex flex-wrap items-center gap-x-4 gap-y-2">

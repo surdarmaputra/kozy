@@ -31,13 +31,13 @@ export function SiteFooter({
           ) : null}
         </div>
 
-        <nav aria-label="Lokasi kos">
-          <p className="text-sm font-semibold">Lokasi</p>
+        <nav aria-label="Locations">
+          <p className="text-sm font-semibold">Locations</p>
           <ul className="mt-3 space-y-2">
             {lokasi.map((item) => (
               <li key={item.slug}>
                 <Link
-                  to="/lokasi/$slug"
+                  to="/locations/$slug"
                   params={{ slug: item.slug }}
                   className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                 >
@@ -51,8 +51,8 @@ export function SiteFooter({
 
       <div className="border-t border-border/70">
         <p className="mx-auto w-full max-w-6xl px-4 py-5 text-xs text-muted-foreground sm:px-6">
-          © {new Date().getFullYear()} {config.brand}. Harga dan ketersediaan
-          dapat berubah, konfirmasi lewat WhatsApp sebelum datang.
+          © {new Date().getFullYear()} {config.brand}. Prices and availability
+          can change, please confirm on WhatsApp before visiting.
         </p>
       </div>
     </footer>

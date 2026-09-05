@@ -10,7 +10,7 @@ export const Route = createRootRoute({
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       { name: 'theme-color', content: '#1f6f4d' },
-      { title: 'Kozy | Katalog kamar kos' },
+      { title: 'Kozy | Room catalogue' },
     ],
     links: [
       { rel: 'stylesheet', href: appCss },
@@ -22,7 +22,7 @@ export const Route = createRootRoute({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id">
+    <html lang="en">
       <head>
         <HeadContent />
       </head>
@@ -31,7 +31,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           href="#konten"
           className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-primary-foreground"
         >
-          Lompat ke konten
+          Skip to content
         </a>
         {children}
         <TanStackDevtools

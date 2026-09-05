@@ -233,7 +233,7 @@ for label, text in (
     ('1', 'Tab lokasi, tambah baris. Isi minimal slug, nama, alamat, dan aktif = TRUE.'),
     ('2', 'Kolom nomor_wa boleh dikosongkan kalau lokasi ini memakai nomor utama di tab config.'),
     ('3', 'Tab kamar, tambah baris kamarnya. Kolom lokasi_slug pilih dari dropdown.'),
-    ('4', 'Buka bookmark Perbarui website. Halaman /lokasi/{slug} langsung ada.'),
+    ('4', 'Buka bookmark Perbarui website. Halaman /locations/{slug} langsung ada.'),
 ):
     r = step(r, label, text)
 r += 1

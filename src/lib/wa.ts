@@ -10,9 +10,9 @@ export function waLinkForRoom(
 ): string {
   const number = lokasi.nomor_wa || fallbackNumber
   const message = [
-    `Halo, saya mau tanya kamar ${kamar.kode} di ${lokasi.nama}.`,
-    `Harga ${formatRupiah(kamar.harga_bulanan)} per bulan, luas ${kamar.luas_m2} m², lantai ${kamar.lantai}.`,
-    'Apakah masih tersedia?',
+    `Hi, I would like to ask about room ${kamar.kode} at ${lokasi.nama}.`,
+    `${formatRupiah(kamar.harga_bulanan)} per month, ${kamar.luas_m2} m², floor ${kamar.lantai}.`,
+    'Is it still available?',
   ].join(' ')
   return `https://wa.me/${number}?text=${encodeURIComponent(message)}`
 }
@@ -22,7 +22,7 @@ export function waLinkForLokasi(
   fallbackNumber: string,
 ): string {
   const number = lokasi.nomor_wa || fallbackNumber
-  const message = `Halo, saya mau tanya ketersediaan kamar di ${lokasi.nama}.`
+  const message = `Hi, I would like to ask which rooms are available at ${lokasi.nama}.`
   return `https://wa.me/${number}?text=${encodeURIComponent(message)}`
 }
 
@@ -33,9 +33,9 @@ export function waLinkForType(
 ): string {
   const number = lokasi.nomor_wa || fallbackNumber
   const message = [
-    `Halo, saya mau tanya kamar tipe ${tipe.nama} di ${lokasi.nama}.`,
-    `Harga mulai ${formatRupiah(tipe.hargaMin)} per bulan.`,
-    'Apakah masih ada yang kosong?',
+    `Hi, I would like to ask about a ${tipe.nama} room at ${lokasi.nama}.`,
+    `From ${formatRupiah(tipe.hargaMin)} per month.`,
+    'Is one still available?',
   ].join(' ')
   return `https://wa.me/${number}?text=${encodeURIComponent(message)}`
 }
