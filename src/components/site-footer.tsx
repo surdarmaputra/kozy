@@ -10,7 +10,7 @@ export function SiteFooter({
   lokasi: Array<LokasiSummary>
 }) {
   return (
-    <footer className="mt-24 border-t border-border bg-card">
+    <footer className="border-t border-border bg-background">
       <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.4fr_1fr]">
         <div>
           <p className="text-lg font-bold tracking-tight">{config.brand}</p>

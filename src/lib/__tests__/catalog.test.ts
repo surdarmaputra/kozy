@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { csvToRecords, parseCsv } from '../csv'
 import { kamarSchema, lokasiSchema, parseRows } from '../schema'
-import { activeLokasi, groupByFloor, roomsFor } from '../select'
+import {
+  activeLokasi,
+  groupByFloor,
+  roomTypesFor,
+  roomsFor,
+  tipeSlug,
+} from '../select'
 import { resolvePhoto } from '../photo'
 import { waLinkForRoom } from '../wa'
 import type { Catalog } from '../schema'
@@ -31,7 +37,7 @@ describe('kamarSchema', () => {
     lokasi_slug: 'Pogung-Baru',
     lantai: '2',
     luas_m2: '14',
-    tipe: 'Deluxe',
+    tipe: ' Deluxe AC ',
     harga_bulanan: 'Rp 1.450.000',
     status: ' KOSONG ',
     fasilitas: 'AC, Lemari , ',
@@ -44,7 +50,7 @@ describe('kamarSchema', () => {
     const kamar = kamarSchema.parse(row)
     expect(kamar.harga_bulanan).toBe(1450000)
     expect(kamar.status).toBe('kosong')
-    expect(kamar.tipe).toBe('deluxe')
+    expect(kamar.tipe).toBe('Deluxe AC')
     expect(kamar.lokasi_slug).toBe('pogung-baru')
     expect(kamar.fasilitas).toEqual(['AC', 'Lemari'])
   })
@@ -125,6 +131,8 @@ function catalogFixture(): Catalog {
           harga_bulanan: '1290000',
           status: 'kosong',
           luas_m2: '15',
+          tipe: 'Standard AC',
+          fasilitas: 'AC, Lemari, Kulkas',
         },
         {
           kode: 'S21',
@@ -133,6 +141,8 @@ function catalogFixture(): Catalog {
           harga_bulanan: '1850000',
           status: 'kosong',
           luas_m2: '18',
+          tipe: 'Deluxe',
+          fasilitas: 'AC, Lemari',
         },
         {
           kode: 'S11',
@@ -141,6 +151,8 @@ function catalogFixture(): Catalog {
           harga_bulanan: '990000',
           status: 'terisi',
           luas_m2: '15',
+          tipe: 'Standard AC',
+          fasilitas: 'AC, Lemari',
         },
         {
           kode: 'X1',
@@ -173,6 +185,37 @@ describe('selectors', () => {
     const floors = groupByFloor(roomsFor(catalogFixture(), 'seturan'))
     expect(floors.map((floor) => floor.lantai)).toEqual([1, 2])
     expect(floors[0].rooms.map((room) => room.kode)).toEqual(['S11', 'S12'])
+  })
+})
+
+describe('roomTypesFor', () => {
+  it('groups by the type name typed in the Sheet, vacancies then cheapest first', () => {
+    const types = roomTypesFor(catalogFixture(), 'seturan')
+    expect(types.map((type) => type.slug)).toEqual(['standard-ac', 'deluxe'])
+  })
+
+  it('counts vacancies per type and keeps inactive rooms out', () => {
+    const standard = roomTypesFor(catalogFixture(), 'seturan').find(
+      (type) => type.slug === 'standard-ac',
+    )!
+    expect(standard.rooms).toHaveLength(2)
+    expect(standard.kosong).toBe(1)
+    expect(standard.hargaMin).toBe(990000)
+    expect(standard.hargaMax).toBe(1290000)
+  })
+
+  it('lists only facilities every room of the type has, never the union', () => {
+    const standard = roomTypesFor(catalogFixture(), 'seturan').find(
+      (type) => type.slug === 'standard-ac',
+    )!
+    expect(standard.fasilitas).toEqual(['AC', 'Lemari'])
+  })
+})
+
+describe('tipeSlug', () => {
+  it('makes a url segment out of a free-text type name', () => {
+    expect(tipeSlug('Deluxe AC')).toBe('deluxe-ac')
+    expect(tipeSlug('  Tipe A / Pojok ')).toBe('tipe-a-pojok')
   })
 })
 

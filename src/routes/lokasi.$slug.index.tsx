@@ -1,17 +1,18 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { ArrowLeft, Check, MapPin, MessageCircle } from 'lucide-react'
+import { ArrowLeft, Check, MapPin } from 'lucide-react'
+import { ContactSection } from '#/components/contact-section'
 import { Photo } from '#/components/photo'
-import { RoomBoard } from '#/components/room-board'
+import { RoomMap } from '#/components/room-map'
+import { RoomTypeList } from '#/components/room-type-list'
 import { SiteFooter } from '#/components/site-footer'
 import { SiteHeader } from '#/components/site-header'
 import { Button } from '#/components/ui/button'
 import { loadCatalog } from '#/lib/catalog'
 import { formatRupiah } from '#/lib/format'
 import { sheetCacheHeaders } from '#/lib/http'
-import { activeLokasi, findLokasi, roomsFor } from '#/lib/select'
-import { waLinkForLokasi } from '#/lib/wa'
+import { activeLokasi, findLokasi, roomTypesFor, roomsFor } from '#/lib/select'
 
-export const Route = createFileRoute('/lokasi/$slug')({
+export const Route = createFileRoute('/lokasi/$slug/')({
   loader: () => loadCatalog(),
   headers: () => sheetCacheHeaders,
   head: ({ loaderData, params }) => {
@@ -23,7 +24,7 @@ export const Route = createFileRoute('/lokasi/$slug')({
     const rooms = loaderData ? roomsFor(loaderData, lokasi.slug) : []
     const kosong = rooms.filter((room) => room.status === 'kosong').length
     const title = `${lokasi.nama} | Kos dekat ${lokasi.alamat.split(',')[0]}`
-    const description = `${kosong} kamar kosong di ${lokasi.nama}, ${lokasi.alamat}. Lihat harga, luas, dan fasilitas tiap kamar lalu chat langsung lewat WhatsApp.`
+    const description = `${kosong} kamar kosong di ${lokasi.nama}, ${lokasi.alamat}. Lihat denah kamar, harga, dan fasilitas tiap tipe, lalu chat lewat WhatsApp.`
 
     return {
       meta: [
@@ -50,10 +51,7 @@ function LokasiDetail() {
   if (!lokasi) {
     return (
       <div className="flex min-h-[100dvh] flex-col">
-        <SiteHeader
-          brand={catalog.config.brand}
-          waNumber={catalog.config.wa_default}
-        />
+        <SiteHeader brand={catalog.config.brand} />
         <main
           id="konten"
           className="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center px-4 py-24 text-center"
@@ -75,21 +73,18 @@ function LokasiDetail() {
   }
 
   const rooms = roomsFor(catalog, lokasi.slug)
+  const types = roomTypesFor(catalog, lokasi.slug)
   const available = rooms.filter((room) => room.status === 'kosong')
-  const hargaMulai = Math.min(
-    ...(available.length > 0 ? available : rooms)
-      .map((room) => room.harga_bulanan)
-      .filter(Boolean),
-  )
-  const waLink = waLinkForLokasi(lokasi, catalog.config.wa_default)
+  const prices = (available.length > 0 ? available : rooms)
+    .map((room) => room.harga_bulanan)
+    .filter((price) => price > 0)
+  const hargaMulai = prices.length > 0 ? Math.min(...prices) : 0
+  const waNumber = lokasi.nomor_wa || catalog.config.wa_default
   const gallery = lokasi.foto_urls.slice(0, 3)
 
   return (
-    <div className="flex min-h-[100dvh] flex-col pb-24 sm:pb-0">
-      <SiteHeader
-        brand={catalog.config.brand}
-        waNumber={catalog.config.wa_default}
-      />
+    <div className="flex min-h-[100dvh] flex-col">
+      <SiteHeader brand={catalog.config.brand} />
 
       <main id="konten" className="flex-1">
         <div className="mx-auto w-full max-w-6xl px-4 pt-6 sm:px-6">
@@ -103,7 +98,7 @@ function LokasiDetail() {
         </div>
 
         <section className="mx-auto w-full max-w-6xl px-4 pt-6 sm:px-6">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl">
               <h1 className="text-3xl leading-tight font-extrabold tracking-tight text-balance sm:text-4xl lg:text-5xl">
                 {lokasi.nama}
@@ -114,24 +109,23 @@ function LokasiDetail() {
               </p>
             </div>
 
-            <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center">
-              <p className="hidden text-sm text-muted-foreground sm:block">
-                <span className="num block text-2xl font-bold text-foreground">
-                  {formatRupiah(Number.isFinite(hargaMulai) ? hargaMulai : 0)}
-                </span>
-                mulai per bulan
-              </p>
-              <Button
-                asChild
-                size="lg"
-                className="hidden h-12 gap-2 px-6 text-base sm:inline-flex"
-              >
-                <a href={waLink} target="_blank" rel="noreferrer">
-                  <MessageCircle className="size-5" aria-hidden />
-                  Chat WhatsApp
-                </a>
-              </Button>
-            </div>
+            <dl className="flex shrink-0 gap-8">
+              <div>
+                <dt className="text-xs text-muted-foreground">Mulai dari</dt>
+                <dd className="num mt-0.5 text-xl font-bold sm:text-2xl">
+                  {formatRupiah(hargaMulai)}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs text-muted-foreground">Kamar kosong</dt>
+                <dd className="num mt-0.5 text-xl font-bold text-status-kosong sm:text-2xl">
+                  {available.length}
+                  <span className="ml-1 text-xs font-medium text-muted-foreground">
+                    dari {rooms.length}
+                  </span>
+                </dd>
+              </div>
+            </dl>
           </div>
 
           {gallery.length > 0 ? (
@@ -195,9 +189,28 @@ function LokasiDetail() {
           ) : null}
         </section>
 
+        {rooms.length > 0 ? (
+          <section className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6">
+            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+              Denah kamar
+            </h2>
+            <p className="mt-2 max-w-xl leading-relaxed text-muted-foreground">
+              Ketuk kamar yang kosong untuk membuka WhatsApp dengan kode
+              kamarnya sudah tertulis.
+            </p>
+            <div className="mt-6">
+              <RoomMap
+                rooms={rooms}
+                lokasi={lokasi}
+                fallbackNumber={catalog.config.wa_default}
+              />
+            </div>
+          </section>
+        ) : null}
+
         <section className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6">
-          <RoomBoard
-            rooms={rooms}
+          <RoomTypeList
+            types={types}
             lokasi={lokasi}
             fallbackNumber={catalog.config.wa_default}
           />
@@ -231,25 +244,7 @@ function LokasiDetail() {
         ) : null}
       </main>
 
-      {/* Most visitors arrive on a phone and decide while scrolling the room
-          grid. The bar keeps the one action they came for within thumb reach. */}
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 px-4 py-3 backdrop-blur sm:hidden">
-        <div className="flex items-center gap-3">
-          <p className="min-w-0 flex-1 text-xs text-muted-foreground">
-            <span className="num block truncate text-base font-bold text-foreground">
-              {formatRupiah(Number.isFinite(hargaMulai) ? hargaMulai : 0)}
-            </span>
-            <span className="num">{available.length}</span> kamar kosong
-          </p>
-          <Button asChild size="lg" className="h-11 shrink-0 gap-2">
-            <a href={waLink} target="_blank" rel="noreferrer">
-              <MessageCircle className="size-4" aria-hidden />
-              Chat WhatsApp
-            </a>
-          </Button>
-        </div>
-      </div>
-
+      <ContactSection waNumber={waNumber} context={lokasi.nama} />
       <SiteFooter config={catalog.config} lokasi={activeLokasi(catalog)} />
     </div>
   )

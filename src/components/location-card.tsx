@@ -5,14 +5,14 @@ import { formatRupiah } from '#/lib/format'
 import { cn } from '#/lib/utils'
 import type { LokasiSummary } from '#/lib/select'
 
-/** The first location gets the wide tile. It is the entry point most visitors
- *  tap, so it carries the landscape photo and the roomier type. */
+/** `wide` is for the single-location case, where a half-width card in an empty
+ *  grid looks like a layout bug. It goes landscape and fills the row instead. */
 export function LocationCard({
   lokasi,
-  featured = false,
+  wide = false,
 }: {
   lokasi: LokasiSummary
-  featured?: boolean
+  wide?: boolean
 }) {
   const available = lokasi.kamarKosong > 0
 
@@ -24,23 +24,23 @@ export function LocationCard({
         'group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card',
         'transition-[transform,border-color] duration-200 hover:border-primary/45 active:scale-[0.99]',
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
-        featured && 'md:col-span-2 md:flex-row',
+        wide && 'md:flex-row',
       )}
     >
       <div
         className={cn(
           'relative shrink-0 overflow-hidden',
-          featured ? 'md:w-1/2' : '',
+          wide ? 'md:w-1/2' : '',
         )}
       >
         <Photo
           src={lokasi.foto_urls[0] ?? ''}
           alt={`Suasana ${lokasi.nama}`}
-          width={featured ? 1200 : 800}
-          priority={featured}
+          width={wide ? 1200 : 900}
+          priority
           className={cn(
             'h-52 w-full sm:h-60',
-            featured && 'md:h-full md:min-h-[19rem]',
+            wide && 'md:h-full md:min-h-[19rem]',
           )}
         />
       </div>
@@ -48,14 +48,14 @@ export function LocationCard({
       <div
         className={cn(
           'flex flex-1 flex-col gap-4 p-5 sm:p-6',
-          featured && 'md:justify-center',
+          wide && 'md:justify-center',
         )}
       >
         <div>
           <h3
             className={cn(
               'font-bold tracking-tight',
-              featured ? 'text-2xl sm:text-3xl' : 'text-xl',
+              wide ? 'text-2xl sm:text-3xl' : 'text-xl',
             )}
           >
             {lokasi.nama}

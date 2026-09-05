@@ -41,11 +41,13 @@ const status = z
   .transform((value) => value.trim().toLowerCase())
   .pipe(z.enum(statusValues).catch('terisi'))
 
+/** Free text, not an enum: the owner names their own room types in the Sheet
+ *  ("Standard", "Deluxe AC", "Tipe A") and the site groups by whatever they
+ *  typed, so a new type needs no deploy. */
 const tipe = z
   .string()
-  .default('standard')
-  .transform((value) => value.trim().toLowerCase())
-  .pipe(z.enum(['standard', 'deluxe']).catch('standard'))
+  .default('Standard')
+  .transform((value) => value.trim() || 'Standard')
 
 export const configRowSchema = z.object({
   key: z.string().min(1),

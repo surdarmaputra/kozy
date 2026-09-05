@@ -10,7 +10,7 @@ export const Route = createRootRoute({
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       { name: 'theme-color', content: '#1f6f4d' },
-      { title: 'Kozy | Kos bulanan di Yogyakarta' },
+      { title: 'Kozy | Katalog kamar kos' },
     ],
     links: [
       { rel: 'stylesheet', href: appCss },

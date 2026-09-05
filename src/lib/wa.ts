@@ -25,3 +25,17 @@ export function waLinkForLokasi(
   const message = `Halo, saya mau tanya ketersediaan kamar di ${lokasi.nama}.`
   return `https://wa.me/${number}?text=${encodeURIComponent(message)}`
 }
+
+export function waLinkForType(
+  lokasi: Lokasi,
+  tipe: { nama: string; hargaMin: number },
+  fallbackNumber: string,
+): string {
+  const number = lokasi.nomor_wa || fallbackNumber
+  const message = [
+    `Halo, saya mau tanya kamar tipe ${tipe.nama} di ${lokasi.nama}.`,
+    `Harga mulai ${formatRupiah(tipe.hargaMin)} per bulan.`,
+    'Apakah masih ada yang kosong?',
+  ].join(' ')
+  return `https://wa.me/${number}?text=${encodeURIComponent(message)}`
+}

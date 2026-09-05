@@ -1,5 +1,5 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { MessageCircle } from 'lucide-react'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import { ContactSection } from '#/components/contact-section'
 import { LocationCard } from '#/components/location-card'
 import { Photo } from '#/components/photo'
 import { SiteFooter } from '#/components/site-footer'
@@ -15,16 +15,15 @@ export const Route = createFileRoute('/')({
   headers: () => sheetCacheHeaders,
   head: ({ loaderData }) => {
     const brand = loaderData?.config.brand ?? 'Kozy'
-    const title = `${brand} | Kos bulanan di Yogyakarta`
     const description =
       loaderData?.config.tagline ??
-      'Daftar kamar kos beserta status ketersediaannya, diperbarui langsung oleh penjaga kos.'
+      'Daftar kamar kos beserta status ketersediaannya, diperbarui langsung dari Google Sheet.'
     return {
       meta: [
-        { title },
+        { title: `${brand} | Katalog kamar kos` },
         { name: 'description', content: description },
         { property: 'og:type', content: 'website' },
-        { property: 'og:title', content: title },
+        { property: 'og:title', content: brand },
         { property: 'og:description', content: description },
         { name: 'twitter:card', content: 'summary_large_image' },
       ],
@@ -36,6 +35,7 @@ export const Route = createFileRoute('/')({
 function Home() {
   const catalog = Route.useLoaderData()
   const lokasi = activeLokasi(catalog)
+  const single = lokasi.length === 1
 
   const totalKosong = lokasi.reduce((sum, item) => sum + item.kamarKosong, 0)
   const prices = lokasi
@@ -47,41 +47,29 @@ function Home() {
 
   return (
     <div className="flex min-h-[100dvh] flex-col">
-      <SiteHeader
-        brand={catalog.config.brand}
-        waNumber={catalog.config.wa_default}
-      />
+      <SiteHeader brand={catalog.config.brand} />
 
       <main id="konten" className="flex-1">
         <section className="mx-auto grid w-full max-w-6xl gap-10 px-4 pt-10 pb-14 sm:px-6 sm:pt-16 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:gap-14 lg:pt-24">
           <div>
             <h1 className="text-4xl leading-[1.05] font-extrabold tracking-tight text-balance sm:text-5xl lg:text-6xl">
-              Cek kamar kosong sebelum chat.
+              {catalog.config.brand}
             </h1>
             <p className="mt-5 max-w-lg text-base leading-relaxed text-muted-foreground sm:text-lg">
               {catalog.config.tagline}
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Button asChild size="lg" className="h-12 px-7 text-base">
-                <a href="#lokasi">Lihat lokasi</a>
-              </Button>
-              {catalog.config.wa_default ? (
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                  className="h-12 gap-2 px-7 text-base"
-                >
-                  <a
-                    href={`https://wa.me/${catalog.config.wa_default}`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    <MessageCircle className="size-5" aria-hidden />
-                    Chat WhatsApp
-                  </a>
+            <div className="mt-8">
+              {single && lokasi[0] ? (
+                <Button asChild size="lg" className="h-12 px-7 text-base">
+                  <Link to="/lokasi/$slug" params={{ slug: lokasi[0].slug }}>
+                    Lihat kamar
+                  </Link>
                 </Button>
-              ) : null}
+              ) : (
+                <Button asChild size="lg" className="h-12 px-7 text-base">
+                  <a href="#lokasi">Lihat lokasi</a>
+                </Button>
+              )}
             </div>
           </div>
 
@@ -112,11 +100,11 @@ function Home() {
           className="mx-auto w-full max-w-6xl scroll-mt-20 px-4 py-16 sm:px-6 sm:py-20"
         >
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Pilih lokasi
+            {single ? 'Lokasi' : 'Pilih lokasi'}
           </h2>
           <p className="mt-3 max-w-xl leading-relaxed text-muted-foreground">
-            Setiap lokasi punya nomor WhatsApp penjaganya sendiri, jadi
-            pertanyaan Anda langsung sampai ke orang yang memegang kuncinya.
+            Nomor WhatsApp bisa berbeda per lokasi. Tombol chat di tiap halaman
+            sudah mengarah ke nomor yang benar.
           </p>
 
           {lokasi.length === 0 ? (
@@ -124,19 +112,17 @@ function Home() {
               Data lokasi belum tersedia. Silakan coba beberapa saat lagi.
             </p>
           ) : (
-            <div className="mt-10 grid gap-5 md:grid-cols-2">
-              {lokasi.map((item, index) => (
-                <LocationCard
-                  key={item.slug}
-                  lokasi={item}
-                  featured={index === 0}
-                />
+            <div
+              className={single ? 'mt-10' : 'mt-10 grid gap-5 md:grid-cols-2'}
+            >
+              {lokasi.map((item) => (
+                <LocationCard key={item.slug} lokasi={item} wide={single} />
               ))}
             </div>
           )}
         </section>
 
-        <section className="mx-auto w-full max-w-6xl px-4 pb-4 sm:px-6">
+        <section className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6 sm:pb-20">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
             Cara sewa
           </h2>
@@ -156,6 +142,7 @@ function Home() {
         </section>
       </main>
 
+      <ContactSection waNumber={catalog.config.wa_default} />
       <SiteFooter config={catalog.config} lokasi={lokasi} />
     </div>
   )
@@ -163,16 +150,16 @@ function Home() {
 
 const steps = [
   {
-    title: 'Buka lokasi terdekat',
-    body: 'Alamat, fasilitas umum, dan peta ada di satu halaman. Tidak perlu bertanya lokasinya di mana.',
+    title: 'Buka halaman lokasi',
+    body: 'Alamat, fasilitas umum, peta, dan denah kamar ada di satu halaman.',
   },
   {
-    title: 'Saring kamar kosong',
-    body: 'Grid kamar menampilkan kode, luas, lantai, dan harga. Yang terisi tetap terlihat supaya Anda tahu ukurannya.',
+    title: 'Baca denah kamarnya',
+    body: 'Warna tiap kamar menunjukkan yang kosong, yang sedang dibooking, dan yang terisi.',
   },
   {
-    title: 'Chat penjaga kosnya',
-    body: 'Satu ketukan membuka WhatsApp dengan kode kamar dan harganya sudah tertulis di pesan.',
+    title: 'Ketuk kamar yang kosong',
+    body: 'WhatsApp terbuka dengan kode kamar, tipe, dan harganya sudah tertulis di pesan.',
   },
 ]
 

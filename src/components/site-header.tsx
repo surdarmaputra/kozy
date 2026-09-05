@@ -1,14 +1,8 @@
 import { Link } from '@tanstack/react-router'
-import { MessageCircle } from 'lucide-react'
-import { Button } from '#/components/ui/button'
 
-export function SiteHeader({
-  brand,
-  waNumber,
-}: {
-  brand: string
-  waNumber: string
-}) {
+/** Deliberately no chat button. Every WhatsApp action on this site is attached
+ *  to a specific room or type, plus one general fallback above the footer. */
+export function SiteHeader({ brand }: { brand: string }) {
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
@@ -22,28 +16,13 @@ export function SiteHeader({
           <span className="text-base">{brand}</span>
         </Link>
 
-        <nav className="flex items-center gap-1 sm:gap-2">
-          <Link
-            to="/"
-            hash="lokasi"
-            className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Lokasi
-          </Link>
-          {waNumber ? (
-            <Button asChild size="sm" className="gap-2">
-              <a
-                href={`https://wa.me/${waNumber}`}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={`Chat WhatsApp ${brand}`}
-              >
-                <MessageCircle className="size-4" aria-hidden />
-                <span className="hidden sm:inline">Chat WhatsApp</span>
-              </a>
-            </Button>
-          ) : null}
-        </nav>
+        <Link
+          to="/"
+          hash="lokasi"
+          className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+        >
+          Lokasi
+        </Link>
       </div>
     </header>
   )

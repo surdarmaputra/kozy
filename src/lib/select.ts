@@ -55,3 +55,79 @@ export function groupByFloor(
     .sort((a, b) => a[0] - b[0])
     .map(([lantai, list]) => ({ lantai, rooms: list }))
 }
+
+export type RoomType = {
+  /** As typed in the Sheet, used verbatim in headings. */
+  nama: string
+  slug: string
+  rooms: Array<Kamar>
+  kosong: number
+  hargaMin: number
+  hargaMax: number
+  luasMin: number
+  luasMax: number
+  /** Only what every room of this type actually has. Listing the union would
+   *  promise an AC to whoever ends up in the room without one. */
+  fasilitas: Array<string>
+  foto: string
+  catatan: string
+}
+
+export function tipeSlug(tipe: string): string {
+  return tipe
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
+export function roomTypesFor(catalog: Catalog, slug: string): Array<RoomType> {
+  const groups = new Map<string, Array<Kamar>>()
+  roomsFor(catalog, slug).forEach((room) => {
+    const key = tipeSlug(room.tipe)
+    const bucket = groups.get(key) ?? []
+    bucket.push(room)
+    groups.set(key, bucket)
+  })
+
+  return [...groups.entries()]
+    .map(([key, rooms]) => {
+      const prices = rooms
+        .map((room) => room.harga_bulanan)
+        .filter((price) => price > 0)
+      const sizes = rooms.map((room) => room.luas_m2).filter((size) => size > 0)
+      const shared = rooms
+        .slice(1)
+        .reduce(
+          (kept, room) => kept.filter((item) => room.fasilitas.includes(item)),
+          rooms[0].fasilitas,
+        )
+      return {
+        nama: rooms[0].tipe,
+        slug: key,
+        rooms,
+        kosong: rooms.filter((room) => room.status === 'kosong').length,
+        hargaMin: prices.length > 0 ? Math.min(...prices) : 0,
+        hargaMax: prices.length > 0 ? Math.max(...prices) : 0,
+        luasMin: sizes.length > 0 ? Math.min(...sizes) : 0,
+        luasMax: sizes.length > 0 ? Math.max(...sizes) : 0,
+        fasilitas: shared,
+        foto:
+          rooms.find((room) => room.foto_urls.length > 0)?.foto_urls[0] ?? '',
+        catatan:
+          rooms.find((room) => room.status === 'kosong' && room.catatan)
+            ?.catatan ?? '',
+      }
+    })
+    .sort((a, b) => b.kosong - a.kosong || a.hargaMin - b.hargaMin)
+}
+
+export function findRoomType(
+  catalog: Catalog,
+  slug: string,
+  tipe: string,
+): RoomType | undefined {
+  return roomTypesFor(catalog, slug).find(
+    (type) => type.slug === tipe.toLowerCase(),
+  )
+}

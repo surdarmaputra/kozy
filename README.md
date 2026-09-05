@@ -1,7 +1,7 @@
 # Kozy
 
 Katalog kos multi-lokasi. Data ketersediaan kamar dibaca langsung dari Google
-Sheet saat request, dirender di server, dan di-cache di CDN Netlify. Pemilik kos
+Sheet saat request, dirender di server, dan di-cache di CDN Netlify. Pemilik
 mengubah status kamar dari HP lewat Sheet, tanpa deploy dan tanpa developer.
 
 ## Stack
@@ -40,14 +40,26 @@ project dan tidak ada API key.
 
 ## Halaman
 
-| Path             | Isi                                                             |
-| ---------------- | --------------------------------------------------------------- |
-| `/`              | Daftar lokasi aktif, agregat kamar kosong, harga terendah       |
-| `/lokasi/$slug`  | Detail lokasi, galeri, fasilitas, grid kamar per lantai, peta   |
-| `/purge?secret=` | Invalidasi cache dan laporan kondisi data, dalam bahasa manusia |
+| Path                       | Isi                                                                |
+| -------------------------- | ------------------------------------------------------------------ |
+| `/`                        | Nama properti, agregat kamar kosong, daftar lokasi aktif           |
+| `/lokasi/$slug`            | Galeri, fasilitas, denah kamar per lantai, daftar tipe kamar, peta |
+| `/lokasi/$slug/tipe/$tipe` | Detail satu tipe kamar, denah dengan tipe lain disamarkan          |
+| `/purge?secret=`           | Invalidasi cache dan laporan kondisi data, dalam bahasa manusia    |
 
-Route baru tidak perlu ditambahkan saat client menambah lokasi. `$slug`
-dicocokkan dengan kolom `slug` di Sheet saat request.
+Route baru tidak perlu ditambahkan saat client menambah lokasi atau tipe kamar.
+`$slug` dan `$tipe` dicocokkan dengan isi Sheet saat request.
+
+## Tipe kamar
+
+Kolom `tipe` di tab `kamar` adalah teks bebas, bukan enum, supaya pemilik bisa
+menamai tipenya sendiri tanpa deploy. Kamar dengan `tipe` sama dikelompokkan
+menjadi satu kartu dan satu halaman tipe. Fasilitas yang ditampilkan adalah
+irisan dari semua kamar bertipe itu, bukan gabungannya, supaya kartu tidak
+menjanjikan fasilitas yang tidak dimiliki sebagian kamar.
+
+Denah kamar menampilkan setiap kamar fisik sebagai kotak berwarna, dikelompokkan
+per lantai. Kotak kamar kosong adalah tautan `wa.me` yang membawa kode kamar itu.
 
 ## Cache dan purge
 
@@ -94,3 +106,5 @@ git commit -am "chore: refresh snapshot"
 - [docs/sop-client.md](docs/sop-client.md) - SOP satu halaman untuk pemilik kos
 - [docs/sheet-template.md](docs/sheet-template.md) - struktur tab, kolom, dan
   data validation yang harus dipasang di Sheet
+- [docs/kozy-sheet-template.xlsx](docs/kozy-sheet-template.xlsx) - template siap
+  unggah ke Google Sheets, sudah berisi contoh data dan halaman panduan
