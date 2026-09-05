@@ -1,0 +1,200 @@
+import { createFileRoute } from '@tanstack/react-router'
+import { MessageCircle } from 'lucide-react'
+import { LocationCard } from '#/components/location-card'
+import { Photo } from '#/components/photo'
+import { SiteFooter } from '#/components/site-footer'
+import { SiteHeader } from '#/components/site-header'
+import { Button } from '#/components/ui/button'
+import { loadCatalog } from '#/lib/catalog'
+import { formatRupiah } from '#/lib/format'
+import { sheetCacheHeaders } from '#/lib/http'
+import { activeLokasi } from '#/lib/select'
+
+export const Route = createFileRoute('/')({
+  loader: () => loadCatalog(),
+  headers: () => sheetCacheHeaders,
+  head: ({ loaderData }) => {
+    const brand = loaderData?.config.brand ?? 'Kozy'
+    const title = `${brand} | Kos bulanan di Yogyakarta`
+    const description =
+      loaderData?.config.tagline ??
+      'Daftar kamar kos beserta status ketersediaannya, diperbarui langsung oleh penjaga kos.'
+    return {
+      meta: [
+        { title },
+        { name: 'description', content: description },
+        { property: 'og:type', content: 'website' },
+        { property: 'og:title', content: title },
+        { property: 'og:description', content: description },
+        { name: 'twitter:card', content: 'summary_large_image' },
+      ],
+    }
+  },
+  component: Home,
+})
+
+function Home() {
+  const catalog = Route.useLoaderData()
+  const lokasi = activeLokasi(catalog)
+
+  const totalKosong = lokasi.reduce((sum, item) => sum + item.kamarKosong, 0)
+  const prices = lokasi
+    .map((item) => item.hargaMulai)
+    .filter((price) => price > 0)
+  const hargaTerendah = prices.length > 0 ? Math.min(...prices) : 0
+  const heroPhoto =
+    lokasi.find((item) => item.foto_urls.length > 0)?.foto_urls[0] ?? ''
+
+  return (
+    <div className="flex min-h-[100dvh] flex-col">
+      <SiteHeader
+        brand={catalog.config.brand}
+        waNumber={catalog.config.wa_default}
+      />
+
+      <main id="konten" className="flex-1">
+        <section className="mx-auto grid w-full max-w-6xl gap-10 px-4 pt-10 pb-14 sm:px-6 sm:pt-16 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:gap-14 lg:pt-24">
+          <div>
+            <h1 className="text-4xl leading-[1.05] font-extrabold tracking-tight text-balance sm:text-5xl lg:text-6xl">
+              Cek kamar kosong sebelum chat.
+            </h1>
+            <p className="mt-5 max-w-lg text-base leading-relaxed text-muted-foreground sm:text-lg">
+              {catalog.config.tagline}
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Button asChild size="lg" className="h-12 px-7 text-base">
+                <a href="#lokasi">Lihat lokasi</a>
+              </Button>
+              {catalog.config.wa_default ? (
+                <Button
+                  asChild
+                  size="lg"
+                  variant="outline"
+                  className="h-12 gap-2 px-7 text-base"
+                >
+                  <a
+                    href={`https://wa.me/${catalog.config.wa_default}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <MessageCircle className="size-5" aria-hidden />
+                    Chat WhatsApp
+                  </a>
+                </Button>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="overflow-hidden rounded-xl border border-border">
+            <Photo
+              src={heroPhoto}
+              alt={`Bangunan ${lokasi[0]?.nama ?? catalog.config.brand}`}
+              width={1400}
+              priority
+              className="aspect-[4/3] w-full lg:aspect-[5/4]"
+            />
+          </div>
+        </section>
+
+        <section
+          aria-label="Ringkasan ketersediaan"
+          className="border-y border-border bg-card"
+        >
+          <dl className="mx-auto grid w-full max-w-6xl grid-cols-3 divide-x divide-border px-4 sm:px-6">
+            <Stat label="Lokasi" value={String(lokasi.length)} />
+            <Stat label="Kamar kosong" value={String(totalKosong)} accent />
+            <Stat label="Mulai dari" value={formatRupiah(hargaTerendah)} />
+          </dl>
+        </section>
+
+        <section
+          id="lokasi"
+          className="mx-auto w-full max-w-6xl scroll-mt-20 px-4 py-16 sm:px-6 sm:py-20"
+        >
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            Pilih lokasi
+          </h2>
+          <p className="mt-3 max-w-xl leading-relaxed text-muted-foreground">
+            Setiap lokasi punya nomor WhatsApp penjaganya sendiri, jadi
+            pertanyaan Anda langsung sampai ke orang yang memegang kuncinya.
+          </p>
+
+          {lokasi.length === 0 ? (
+            <p className="mt-10 rounded-xl border border-dashed border-border bg-card px-6 py-12 text-center text-sm text-muted-foreground">
+              Data lokasi belum tersedia. Silakan coba beberapa saat lagi.
+            </p>
+          ) : (
+            <div className="mt-10 grid gap-5 md:grid-cols-2">
+              {lokasi.map((item, index) => (
+                <LocationCard
+                  key={item.slug}
+                  lokasi={item}
+                  featured={index === 0}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section className="mx-auto w-full max-w-6xl px-4 pb-4 sm:px-6">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            Cara sewa
+          </h2>
+          <ol className="mt-10 max-w-2xl">
+            {steps.map((step) => (
+              <li
+                key={step.title}
+                className="border-t border-border py-7 last:border-b"
+              >
+                <h3 className="text-lg font-semibold">{step.title}</h3>
+                <p className="mt-1.5 leading-relaxed text-muted-foreground">
+                  {step.body}
+                </p>
+              </li>
+            ))}
+          </ol>
+        </section>
+      </main>
+
+      <SiteFooter config={catalog.config} lokasi={lokasi} />
+    </div>
+  )
+}
+
+const steps = [
+  {
+    title: 'Buka lokasi terdekat',
+    body: 'Alamat, fasilitas umum, dan peta ada di satu halaman. Tidak perlu bertanya lokasinya di mana.',
+  },
+  {
+    title: 'Saring kamar kosong',
+    body: 'Grid kamar menampilkan kode, luas, lantai, dan harga. Yang terisi tetap terlihat supaya Anda tahu ukurannya.',
+  },
+  {
+    title: 'Chat penjaga kosnya',
+    body: 'Satu ketukan membuka WhatsApp dengan kode kamar dan harganya sudah tertulis di pesan.',
+  },
+]
+
+function Stat({
+  label,
+  value,
+  accent = false,
+}: {
+  label: string
+  value: string
+  accent?: boolean
+}) {
+  return (
+    <div className="px-2 py-6 text-center sm:py-8">
+      <dt className="text-xs text-muted-foreground sm:text-sm">{label}</dt>
+      <dd
+        className={`num mt-1 text-base font-bold tracking-tight sm:text-2xl ${
+          accent ? 'text-status-kosong' : ''
+        }`}
+      >
+        {value}
+      </dd>
+    </div>
+  )
+}
