@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "conventional-commit": {
+      "source": "surdarmaputra/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/conventional-commit/SKILL.md",
+      "computedHash": "68907f3ff6631927af514eaf931bf533c3376a333d00d8e140f57b32c2484363"
+    },
+    "design-taste-frontend": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/taste-skill/SKILL.md",
+      "computedHash": "6d838b246d0e35d0b53f4f23f98ba7a1dd561937e64f7d0c7553b0928e376c3e"
+    }
+  }
+}

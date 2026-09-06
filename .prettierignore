@@ -1,0 +1,11 @@
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Vendored agent skills. Third-party content, not ours to reformat.
+.agents/
+.claude/
+
+# Build output
+dist/
+.netlify/

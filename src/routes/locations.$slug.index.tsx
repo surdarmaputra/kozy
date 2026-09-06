@@ -1,0 +1,252 @@
+import { Link, createFileRoute } from '@tanstack/react-router'
+import { ArrowLeft, Check, MapPin } from 'lucide-react'
+import { ContactSection } from '#/components/contact-section'
+import { Photo } from '#/components/photo'
+import { RoomMap } from '#/components/room-map'
+import { RoomTypeList } from '#/components/room-type-list'
+import { SiteFooter } from '#/components/site-footer'
+import { SiteHeader } from '#/components/site-header'
+import { Button } from '#/components/ui/button'
+import { loadCatalog } from '#/lib/catalog'
+import { formatRupiah } from '#/lib/format'
+import { sheetCacheHeaders } from '#/lib/http'
+import { activeLokasi, findLokasi, roomTypesFor, roomsFor } from '#/lib/select'
+
+export const Route = createFileRoute('/locations/$slug/')({
+  loader: () => loadCatalog(),
+  headers: () => sheetCacheHeaders,
+  head: ({ loaderData, params }) => {
+    const lokasi = loaderData ? findLokasi(loaderData, params.slug) : undefined
+    const brand = loaderData?.config.brand ?? 'Kozy'
+    if (!lokasi) return { meta: [{ title: `Location not found | ${brand}` }] }
+
+    const rooms = loaderData ? roomsFor(loaderData, lokasi.slug) : []
+    const kosong = rooms.filter((room) => room.status === 'kosong').length
+    const title = `${lokasi.nama} | Rooms near ${lokasi.alamat.split(',')[0]}`
+    const description = `${kosong} rooms available at ${lokasi.nama}, ${lokasi.alamat}. See the room map, prices, and facilities for every type, then chat on WhatsApp.`
+
+    return {
+      meta: [
+        { title },
+        { name: 'description', content: description },
+        { property: 'og:type', content: 'website' },
+        { property: 'og:title', content: title },
+        { property: 'og:description', content: description },
+        ...(lokasi.foto_urls[0]
+          ? [{ property: 'og:image' as const, content: lokasi.foto_urls[0] }]
+          : []),
+        { name: 'twitter:card', content: 'summary_large_image' },
+      ],
+    }
+  },
+  component: LokasiDetail,
+})
+
+function LokasiDetail() {
+  const catalog = Route.useLoaderData()
+  const { slug } = Route.useParams()
+  const lokasi = findLokasi(catalog, slug)
+
+  if (!lokasi) {
+    return (
+      <div className="flex min-h-[100dvh] flex-col">
+        <SiteHeader brand={catalog.config.brand} />
+        <main
+          id="konten"
+          className="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center px-4 py-24 text-center"
+        >
+          <h1 className="text-3xl font-bold tracking-tight">
+            Location not found
+          </h1>
+          <p className="mt-3 leading-relaxed text-muted-foreground">
+            This page may have been switched off. Have a look at the locations
+            currently taking tenants.
+          </p>
+          <Button asChild className="mx-auto mt-8 h-11 px-6">
+            <Link to="/">See locations</Link>
+          </Button>
+        </main>
+        <SiteFooter config={catalog.config} lokasi={activeLokasi(catalog)} />
+      </div>
+    )
+  }
+
+  const rooms = roomsFor(catalog, lokasi.slug)
+  const types = roomTypesFor(catalog, lokasi.slug)
+  const available = rooms.filter((room) => room.status === 'kosong')
+  const prices = (available.length > 0 ? available : rooms)
+    .map((room) => room.harga_bulanan)
+    .filter((price) => price > 0)
+  const hargaMulai = prices.length > 0 ? Math.min(...prices) : 0
+  const waNumber = lokasi.nomor_wa || catalog.config.wa_default
+  const gallery = lokasi.foto_urls.slice(0, 3)
+
+  return (
+    <div className="flex min-h-[100dvh] flex-col">
+      <SiteHeader brand={catalog.config.brand} />
+
+      <main id="konten" className="flex-1">
+        <div className="mx-auto w-full max-w-6xl px-4 pt-6 sm:px-6">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <ArrowLeft className="size-4" aria-hidden />
+            All locations
+          </Link>
+        </div>
+
+        <section className="mx-auto w-full max-w-6xl px-4 pt-6 sm:px-6">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <h1 className="text-3xl leading-tight font-extrabold tracking-tight text-balance sm:text-4xl lg:text-5xl">
+                {lokasi.nama}
+              </h1>
+              <p className="mt-3 flex items-start gap-2 leading-relaxed text-muted-foreground">
+                <MapPin className="mt-1 size-4 shrink-0" aria-hidden />
+                {lokasi.alamat}
+              </p>
+            </div>
+
+            <dl className="flex shrink-0 gap-8">
+              <div>
+                <dt className="text-xs text-muted-foreground">From</dt>
+                <dd className="num mt-0.5 text-xl font-bold sm:text-2xl">
+                  {formatRupiah(hargaMulai)}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs text-muted-foreground">
+                  Rooms available
+                </dt>
+                <dd className="num mt-0.5 text-xl font-bold text-status-kosong sm:text-2xl">
+                  {available.length}
+                  <span className="ml-1 text-xs font-medium text-muted-foreground">
+                    of {rooms.length}
+                  </span>
+                </dd>
+              </div>
+            </dl>
+          </div>
+
+          {gallery.length > 0 ? (
+            <div className="mt-8 grid gap-3 sm:grid-cols-3">
+              <div className="overflow-hidden rounded-xl border border-border sm:col-span-2">
+                <Photo
+                  src={gallery[0]}
+                  alt={`${lokasi.nama} building`}
+                  width={1400}
+                  priority
+                  className="aspect-[16/10] w-full"
+                />
+              </div>
+              {gallery.length > 1 ? (
+                <div className="hidden gap-3 sm:grid sm:grid-rows-2">
+                  {gallery.slice(1).map((photo, index) => (
+                    <div
+                      key={photo}
+                      className="overflow-hidden rounded-xl border border-border"
+                    >
+                      <Photo
+                        src={photo}
+                        alt={`${lokasi.nama} facility ${index + 1}`}
+                        width={700}
+                        className="aspect-[16/10] w-full sm:h-full"
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+        </section>
+
+        <section className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-14 sm:px-6 md:grid-cols-[1.3fr_1fr] md:gap-14">
+          {lokasi.deskripsi ? (
+            <p className="max-w-[65ch] text-lg leading-relaxed">
+              {lokasi.deskripsi}
+            </p>
+          ) : (
+            <div />
+          )}
+
+          {lokasi.fasilitas.length > 0 ? (
+            <div>
+              <h2 className="text-sm font-semibold text-muted-foreground">
+                Shared facilities
+              </h2>
+              <ul className="mt-4 grid grid-cols-1 gap-x-6 gap-y-2.5 sm:grid-cols-2 md:grid-cols-1">
+                {lokasi.fasilitas.map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-sm">
+                    <Check
+                      className="size-4 shrink-0 text-primary"
+                      aria-hidden
+                    />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </section>
+
+        {rooms.length > 0 ? (
+          <section className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6">
+            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+              Room map
+            </h2>
+            <p className="mt-2 max-w-xl leading-relaxed text-muted-foreground">
+              Tap an available room to open WhatsApp with its room code already
+              written in.
+            </p>
+            <div className="mt-6">
+              <RoomMap
+                rooms={rooms}
+                lokasi={lokasi}
+                fallbackNumber={catalog.config.wa_default}
+              />
+            </div>
+          </section>
+        ) : null}
+
+        <section className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6">
+          <RoomTypeList
+            types={types}
+            lokasi={lokasi}
+            fallbackNumber={catalog.config.wa_default}
+          />
+        </section>
+
+        {lokasi.lat !== 0 && lokasi.lng !== 0 ? (
+          <section className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6">
+            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+              On the map
+            </h2>
+            <div className="mt-5 overflow-hidden rounded-xl border border-border">
+              <iframe
+                title={`Map of ${lokasi.nama}`}
+                src={`https://www.google.com/maps?q=${lokasi.lat},${lokasi.lng}&z=16&output=embed`}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="h-[320px] w-full border-0 sm:h-[420px]"
+              />
+            </div>
+            {lokasi.gmaps_url ? (
+              <a
+                href={lokasi.gmaps_url}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-4 inline-block text-sm font-medium text-primary underline-offset-4 hover:underline"
+              >
+                Open directions in Google Maps
+              </a>
+            ) : null}
+          </section>
+        ) : null}
+      </main>
+
+      <ContactSection waNumber={waNumber} context={lokasi.nama} />
+      <SiteFooter config={catalog.config} lokasi={activeLokasi(catalog)} />
+    </div>
+  )
+}
