@@ -111,6 +111,12 @@ git commit -am "chore: refresh snapshot"
 3. After the first deploy, make a bookmark for the owner:
    `https://<domain>/purge?secret=<PURGE_SECRET>`.
 
+## Working on this repo
+
+[`AGENTS.md`](AGENTS.md) is the contract for humans and agents alike: the
+single gate (`npm run verify`), the guardrail ladder, the frozen Sheet
+contract, and a diff-driven map into [`docs/harness/`](docs/harness/).
+
 ## Handover
 
 The handover docs are written in Indonesian for the owner.
