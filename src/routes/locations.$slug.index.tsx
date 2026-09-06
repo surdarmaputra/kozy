@@ -2,9 +2,9 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import { ArrowLeft, Check, MapPin } from 'lucide-react'
 import { CatalogUnavailable } from '#/components/catalog-unavailable'
 import { ContactSection } from '#/components/contact-section'
+import { Lightbox } from '#/components/lightbox'
 import { Photo } from '#/components/photo'
-import { RoomMap } from '#/components/room-map'
-import { RoomTypeList } from '#/components/room-type-list'
+import { RoomPicker } from '#/components/room-picker'
 import { SiteFooter } from '#/components/site-footer'
 import { SiteHeader } from '#/components/site-header'
 import { Button } from '#/components/ui/button'
@@ -136,7 +136,11 @@ function LokasiDetail() {
 
           {gallery.length > 0 ? (
             <div className="mt-8 grid gap-3 sm:grid-cols-3">
-              <div className="overflow-hidden rounded-xl sm:col-span-2">
+              <Lightbox
+                src={gallery[0]}
+                alt={`Bangunan ${lokasi.nama}`}
+                className="rounded-xl sm:col-span-2"
+              >
                 <Photo
                   src={gallery[0]}
                   alt={`Bangunan ${lokasi.nama}`}
@@ -144,18 +148,23 @@ function LokasiDetail() {
                   priority
                   className="aspect-[16/10] w-full"
                 />
-              </div>
+              </Lightbox>
               {gallery.length > 1 ? (
                 <div className="hidden gap-3 sm:grid sm:grid-rows-2">
                   {gallery.slice(1).map((photo, index) => (
-                    <div key={photo} className="overflow-hidden rounded-xl">
+                    <Lightbox
+                      key={photo}
+                      src={photo}
+                      alt={`Fasilitas ${lokasi.nama} ${index + 1}`}
+                      className="rounded-xl sm:h-full"
+                    >
                       <Photo
                         src={photo}
                         alt={`Fasilitas ${lokasi.nama} ${index + 1}`}
                         width={700}
                         className="aspect-[16/10] w-full sm:h-full"
                       />
-                    </div>
+                    </Lightbox>
                   ))}
                 </div>
               ) : null}
@@ -192,28 +201,10 @@ function LokasiDetail() {
           ) : null}
         </section>
 
-        {rooms.length > 0 ? (
-          <section className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6">
-            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
-              Denah kamar
-            </h2>
-            <p className="mt-2 max-w-xl leading-relaxed text-muted-foreground">
-              Ketuk kamar yang tersedia untuk membuka WhatsApp dengan kode
-              kamarnya sudah tertulis.
-            </p>
-            <div className="mt-6">
-              <RoomMap
-                rooms={rooms}
-                lokasi={lokasi}
-                fallbackNumber={catalog.config.wa_default}
-              />
-            </div>
-          </section>
-        ) : null}
-
         <section className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6">
-          <RoomTypeList
+          <RoomPicker
             types={types}
+            rooms={rooms}
             lokasi={lokasi}
             fallbackNumber={catalog.config.wa_default}
           />

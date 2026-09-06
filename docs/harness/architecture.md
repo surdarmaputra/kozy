@@ -98,10 +98,11 @@ Sheet actually returned — including "could not be read" when the re-read is
 
 ## #routing
 
-File-based, flat. `locations.$slug.index.tsx` → `/locations/:slug`;
-`locations.$slug.type.$type.tsx` → `/locations/:slug/type/:type`. Slugs and
-type slugs are matched against Sheet contents at request time, so a new
-location or room type needs no route and no deploy.
+File-based, flat. `index.tsx` → `/`, `locations.$slug.index.tsx` →
+`/locations/:slug`, `purge.tsx` → `/purge`. Slugs are matched against Sheet
+contents at request time, so a new location needs no route and no deploy. Room
+types have no route of their own: the location page groups by the `tipe` column
+and shows every type's detail inline, in a dialog.
 
 A missing slug renders a friendly not-found page inside the normal shell, not a
 thrown 404 — the Sheet is user-edited and typos are expected.

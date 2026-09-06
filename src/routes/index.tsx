@@ -176,8 +176,8 @@ const steps = [
     body: 'Tiap kamar diberi warna sesuai status: tersedia, dibooking, atau terisi.',
   },
   {
-    title: 'Ketuk kamar yang tersedia',
-    body: 'WhatsApp terbuka dengan kode kamar, tipe, dan harganya sudah tertulis di pesan.',
+    title: 'Ketuk kamar untuk lihat detail',
+    body: 'Harga, luas, dan catatan kamar muncul di satu kotak, lengkap dengan tombol WhatsApp yang kode kamarnya sudah tertulis.',
   },
 ]
 

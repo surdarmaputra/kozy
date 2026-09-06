@@ -70,7 +70,6 @@ export type RoomType = {
    *  promise an AC to whoever ends up in the room without one. */
   fasilitas: Array<string>
   foto: string
-  catatan: string
 }
 
 export function tipeSlug(tipe: string): string {
@@ -114,20 +113,7 @@ export function roomTypesFor(catalog: Catalog, slug: string): Array<RoomType> {
         fasilitas: shared,
         foto:
           rooms.find((room) => room.foto_urls.length > 0)?.foto_urls[0] ?? '',
-        catatan:
-          rooms.find((room) => room.status === 'kosong' && room.catatan)
-            ?.catatan ?? '',
       }
     })
     .sort((a, b) => b.kosong - a.kosong || a.hargaMin - b.hargaMin)
-}
-
-export function findRoomType(
-  catalog: Catalog,
-  slug: string,
-  tipe: string,
-): RoomType | undefined {
-  return roomTypesFor(catalog, slug).find(
-    (type) => type.slug === tipe.toLowerCase(),
-  )
 }

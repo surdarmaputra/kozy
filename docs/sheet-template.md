@@ -35,24 +35,24 @@ Unggah ke Google Drive, buka dengan Google Sheets, lalu isi datanya.
 Satu baris untuk satu kamar fisik. Kamar inilah yang muncul sebagai kotak di
 denah kamar.
 
-| Kolom           | Isi                                                              | Contoh                        |
-| --------------- | ---------------------------------------------------------------- | ----------------------------- |
-| `kode`          | Kode kamar, tampil di denah                                      | `B3`                          |
-| `lokasi_slug`   | Harus sama persis dengan `slug` di tab `lokasi`                  | `batam-centre`                |
-| `lantai`        | Angka, menentukan pengelompokan di denah                         | `2`                           |
-| `luas_m2`       | Angka                                                            | `16`                          |
-| `tipe`          | **Nama tipe bebas.** Ditulis sama persis untuk kamar yang setipe | `Deluxe AC`                   |
-| `harga_bulanan` | Angka, boleh pakai titik                                         | `1850000`                     |
-| `status`        | `kosong`, `dibooking`, atau `terisi`                             | `kosong`                      |
-| `fasilitas`     | Dipisah koma                                                     | `AC, Kamar mandi dalam`       |
-| `foto_urls`     | Dipisah koma                                                     |                               |
-| `catatan`       | Satu kalimat, boleh kosong                                       | `Ditahan sampai 18 September` |
-| `aktif`         | `TRUE` tampil, `FALSE` disembunyikan                             | `TRUE`                        |
+| Kolom           | Isi                                                                                                        | Contoh                        |
+| --------------- | ---------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| `kode`          | Kode kamar, tampil di denah                                                                                | `B3`                          |
+| `lokasi_slug`   | Harus sama persis dengan `slug` di tab `lokasi`                                                            | `batam-centre`                |
+| `lantai`        | Angka, menentukan pengelompokan di denah                                                                   | `2`                           |
+| `luas_m2`       | Angka                                                                                                      | `16`                          |
+| `tipe`          | **Nama tipe bebas.** Ditulis sama persis untuk kamar yang setipe                                           | `Deluxe AC`                   |
+| `harga_bulanan` | Angka, boleh pakai titik                                                                                   | `1850000`                     |
+| `status`        | `kosong`, `dibooking`, atau `terisi`                                                                       | `kosong`                      |
+| `fasilitas`     | Dipisah koma                                                                                               | `AC, Kamar mandi dalam`       |
+| `foto_urls`     | Dipisah koma                                                                                               |                               |
+| `catatan`       | Satu kalimat, boleh kosong. Tampil saat pengunjung ketuk kamar, dan kamarnya diberi titik penanda di denah | `Ditahan sampai 18 September` |
+| `aktif`         | `TRUE` tampil, `FALSE` disembunyikan                                                                       | `TRUE`                        |
 
 ### Aturan penting soal `tipe`
 
-Kolom `tipe` adalah yang mengelompokkan kamar menjadi kartu tipe kamar dan
-halaman `/locations/{slug}/type/{tipe}`. Karena itu:
+Kolom `tipe` adalah yang mengelompokkan kamar menjadi daftar tipe di halaman
+lokasi. Karena itu:
 
 - **Tulis sama persis** untuk kamar yang setipe. `Deluxe AC` dan `deluxe ac`
   dianggap tipe yang sama, tetapi `Deluxe AC` dan `Deluxe A/C` menjadi dua tipe.

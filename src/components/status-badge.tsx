@@ -37,8 +37,9 @@ export function StatusBadge({
 }
 
 /** Reading key for the room map. Three states is few enough that a legend beats
- *  a tooltip nobody taps on a phone. */
-export function StatusLegend() {
+ *  a tooltip nobody taps on a phone. `hasNotes` adds the key for the dot that
+ *  marks rooms the owner left a note on in the Sheet. */
+export function StatusLegend({ hasNotes = false }: { hasNotes?: boolean }) {
   return (
     <ul className="flex flex-wrap items-center gap-x-4 gap-y-2">
       {(['kosong', 'dibooking', 'terisi'] as Array<RoomStatus>).map(
@@ -59,6 +60,15 @@ export function StatusLegend() {
           </li>
         ),
       )}
+      {hasNotes ? (
+        <li className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span
+            aria-hidden
+            className="size-2.5 rounded-full bg-status-dibooking ring-2 ring-card"
+          />
+          Ada catatan
+        </li>
+      ) : null}
     </ul>
   )
 }
