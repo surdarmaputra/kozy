@@ -166,7 +166,7 @@ function catalogFixture(): Catalog {
       'kamar',
       skipped,
     ),
-    source: 'snapshot',
+    source: 'seed',
     fetchedAt: '',
     skipped,
   }

@@ -1,14 +1,14 @@
 import { csvToRecords } from './csv'
 import { configRowSchema, kamarSchema, lokasiSchema, parseRows } from './schema'
 import type { Catalog, SiteConfig } from './schema'
-import snapshot from '../data/snapshot.json' with { type: 'json' }
+import { persist, recall } from './store'
 
-const TTL_MS = 5 * 60 * 1000
+const TTL_MS = 60 * 1000
 const FETCH_TIMEOUT_MS = 8000
 
 const defaultConfig: SiteConfig = {
   brand: 'Kozy',
-  tagline: 'Rooms ready to move into',
+  tagline: 'Kamar kos siap huni',
   wa_default: '',
   alamat_kantor: '',
 }
@@ -53,8 +53,15 @@ function toConfig(
   }
 }
 
-function snapshotCatalog(skipped: Array<string>): Catalog {
-  const raw = snapshot as {
+/** Sample data shipped in the repo. Rendered only when SHEET_ID is unset (local
+ *  dev, the CI build). Never a fallback for a failed fetch — a real outage shows
+ *  the last good copy or a friendly unavailable page instead. Loaded lazily so
+ *  the JSON stays out of the hot server bundle. */
+async function seedCatalog(skipped: Array<string>): Promise<Catalog> {
+  const { default: seed } = await import('../data/snapshot.json', {
+    with: { type: 'json' },
+  })
+  const raw = seed as {
     config: Array<Record<string, string>>
     lokasi: Array<Record<string, string>>
     kamar: Array<Record<string, string>>
@@ -63,62 +70,70 @@ function snapshotCatalog(skipped: Array<string>): Catalog {
     config: toConfig(raw.config, skipped),
     lokasi: parseRows(lokasiSchema, raw.lokasi, 'lokasi', skipped),
     kamar: parseRows(kamarSchema, raw.kamar, 'kamar', skipped),
-    source: 'snapshot',
+    source: 'seed',
     fetchedAt: new Date().toISOString(),
     skipped,
   }
 }
 
+/** Reads the Sheet, or the seed when there is no SHEET_ID. Throws on any read
+ *  failure — the caller decides what to serve instead. */
 async function readCatalog(): Promise<Catalog> {
   const skipped: Array<string> = []
 
-  if (!sheetId()) {
-    skipped.push('SHEET_ID is empty, serving snapshot.json')
-    return snapshotCatalog(skipped)
-  }
+  if (!sheetId()) return seedCatalog(skipped)
 
-  try {
-    const [config, lokasi, kamar] = await Promise.all([
-      fetchTab('config'),
-      fetchTab('lokasi'),
-      fetchTab('kamar'),
-    ])
-    const catalog: Catalog = {
-      config: toConfig(config, skipped),
-      lokasi: parseRows(lokasiSchema, lokasi, 'lokasi', skipped),
-      kamar: parseRows(kamarSchema, kamar, 'kamar', skipped),
-      source: 'sheet',
-      fetchedAt: new Date().toISOString(),
-      skipped,
-    }
-    // An empty sheet is indistinguishable from a broken one for a visitor,
-    // so treat it as a failure and keep the snapshot on screen.
-    if (catalog.lokasi.length === 0) throw new Error('the lokasi tab is empty')
-    return catalog
-  } catch (error) {
-    skipped.push(
-      `Could not read the Sheet: ${error instanceof Error ? error.message : String(error)}`,
-    )
-    return snapshotCatalog(skipped)
+  const [config, lokasi, kamar] = await Promise.all([
+    fetchTab('config'),
+    fetchTab('lokasi'),
+    fetchTab('kamar'),
+  ])
+  const catalog: Catalog = {
+    config: toConfig(config, skipped),
+    lokasi: parseRows(lokasiSchema, lokasi, 'lokasi', skipped),
+    kamar: parseRows(kamarSchema, kamar, 'kamar', skipped),
+    source: 'sheet',
+    fetchedAt: new Date().toISOString(),
+    skipped,
   }
+  // An empty sheet reads the same as a broken one for a visitor, so treat it as
+  // a failure and let the last good copy stay on screen.
+  if (catalog.lokasi.length === 0) throw new Error('the lokasi tab is empty')
+  return catalog
 }
 
-/** One fetch per tab per TTL regardless of traffic. Stale data is served while
- *  a refresh is in flight so a slow Sheet never blocks a render. */
-export async function getCatalog(): Promise<Catalog> {
+/** One fetch per tab per TTL regardless of traffic. On failure: the last
+ *  in-memory copy, then the persisted copy from disk/Blobs, then null so the
+ *  route can render a friendly unavailable page. */
+export async function getCatalog(): Promise<Catalog | null> {
   const now = Date.now()
   if (cache && cache.expiresAt > now) return cache.catalog
 
   try {
     const catalog = await readCatalog()
     cache = { catalog, expiresAt: now + TTL_MS }
+    if (catalog.source === 'sheet') persist(catalog)
     return catalog
   } catch {
-    if (cache) return cache.catalog
-    throw new Error('catalogue unavailable')
+    // Serve the stale in-memory copy, but push the expiry out a full TTL so a
+    // down Sheet is not re-hit on every request during the outage.
+    if (cache) {
+      cache = { catalog: cache.catalog, expiresAt: now + TTL_MS }
+      return cache.catalog
+    }
+    // Cold instance mid-outage: pull the last good copy off disk/Blobs and cache
+    // it so that cost is paid once per TTL, not per request.
+    const recalled = await recall()
+    if (recalled) {
+      cache = { catalog: recalled, expiresAt: now + TTL_MS }
+      return recalled
+    }
+    return null
   }
 }
 
+/** Clears only the in-process cache, not the persisted last-good copy: a purge
+ *  must never destroy the outage safety net. */
 export function clearCatalogCache() {
   cache = null
 }

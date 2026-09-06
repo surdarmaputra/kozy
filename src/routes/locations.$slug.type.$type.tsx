@@ -1,5 +1,6 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { ArrowLeft, Check, MessageCircle, Ruler } from 'lucide-react'
+import { CatalogUnavailable } from '#/components/catalog-unavailable'
 import { ContactSection } from '#/components/contact-section'
 import { Photo } from '#/components/photo'
 import { RoomMap } from '#/components/room-map'
@@ -8,13 +9,14 @@ import { SiteHeader } from '#/components/site-header'
 import { Button } from '#/components/ui/button'
 import { loadCatalog } from '#/lib/catalog'
 import { formatRupiah } from '#/lib/format'
-import { sheetCacheHeaders } from '#/lib/http'
+import { noStoreHeaders, sheetCacheHeaders } from '#/lib/http'
 import { activeLokasi, findLokasi, findRoomType, roomsFor } from '#/lib/select'
 import { waLinkForType } from '#/lib/wa'
 
 export const Route = createFileRoute('/locations/$slug/type/$type')({
   loader: () => loadCatalog(),
-  headers: () => sheetCacheHeaders,
+  headers: ({ loaderData }) =>
+    loaderData == null ? noStoreHeaders : sheetCacheHeaders,
   head: ({ loaderData, params }) => {
     const brand = loaderData?.config.brand ?? 'Kozy'
     const lokasi = loaderData ? findLokasi(loaderData, params.slug) : undefined
@@ -22,10 +24,10 @@ export const Route = createFileRoute('/locations/$slug/type/$type')({
       ? findRoomType(loaderData, params.slug, params.type)
       : undefined
     if (!lokasi || !tipe)
-      return { meta: [{ title: `Room type not found | ${brand}` }] }
+      return { meta: [{ title: `Tipe kamar tidak ditemukan | ${brand}` }] }
 
-    const title = `${tipe.nama} rooms at ${lokasi.nama}`
-    const description = `${tipe.kosong} of ${tipe.rooms.length} ${tipe.nama} rooms available. ${tipe.luasMin} m², from ${formatRupiah(tipe.hargaMin)} per month at ${lokasi.alamat}.`
+    const title = `Kamar ${tipe.nama} di ${lokasi.nama}`
+    const description = `${tipe.kosong} dari ${tipe.rooms.length} kamar ${tipe.nama} tersedia. ${tipe.luasMin} m², mulai ${formatRupiah(tipe.hargaMin)} per bulan di ${lokasi.alamat}.`
 
     return {
       meta: [
@@ -47,6 +49,8 @@ export const Route = createFileRoute('/locations/$slug/type/$type')({
 function TipeDetail() {
   const catalog = Route.useLoaderData()
   const params = Route.useParams()
+  if (!catalog) return <CatalogUnavailable />
+
   const lokasi = findLokasi(catalog, params.slug)
   const tipe = lokasi
     ? findRoomType(catalog, lokasi.slug, params.type)
@@ -61,14 +65,14 @@ function TipeDetail() {
           className="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center px-4 py-24 text-center"
         >
           <h1 className="text-3xl font-bold tracking-tight">
-            Room type not found
+            Tipe kamar tidak ditemukan
           </h1>
           <p className="mt-3 leading-relaxed text-muted-foreground">
-            This type may have been switched off. Have a look at the types
-            available now.
+            Tipe ini mungkin sedang dinonaktifkan. Coba lihat tipe yang tersedia
+            sekarang.
           </p>
           <Button asChild className="mx-auto mt-8 h-11 px-6">
-            <Link to="/">See locations</Link>
+            <Link to="/">Lihat lokasi</Link>
           </Button>
         </main>
         <SiteFooter config={catalog.config} lokasi={activeLokasi(catalog)} />
@@ -100,10 +104,10 @@ function TipeDetail() {
         </div>
 
         <section className="mx-auto grid w-full max-w-6xl gap-8 px-4 pt-6 pb-14 sm:px-6 lg:grid-cols-[1fr_1.1fr] lg:gap-12">
-          <div className="overflow-hidden rounded-xl border border-border lg:order-2">
+          <div className="reveal overflow-hidden rounded-xl [animation-delay:120ms] lg:order-2">
             <Photo
               src={tipe.foto}
-              alt={`${tipe.nama} room at ${lokasi.nama}`}
+              alt={`Kamar ${tipe.nama} di ${lokasi.nama}`}
               width={1200}
               priority
               className="aspect-[4/3] w-full"
@@ -111,36 +115,38 @@ function TipeDetail() {
           </div>
 
           <div className="lg:order-1">
-            <h1 className="text-3xl leading-tight font-extrabold tracking-tight text-balance sm:text-4xl lg:text-5xl">
+            <h1 className="reveal text-3xl leading-tight font-extrabold tracking-tight text-balance sm:text-4xl lg:text-5xl">
               {tipe.nama}
             </h1>
-            <p className="mt-3 text-muted-foreground">{lokasi.nama}</p>
+            <p className="reveal mt-3 text-muted-foreground [animation-delay:80ms]">
+              {lokasi.nama}
+            </p>
 
-            <dl className="mt-7 flex flex-wrap gap-x-10 gap-y-5">
+            <dl className="reveal mt-7 flex flex-wrap gap-x-10 gap-y-5 [animation-delay:120ms]">
               <div>
-                <dt className="text-xs text-muted-foreground">Price</dt>
+                <dt className="text-xs text-muted-foreground">Harga</dt>
                 <dd className="num mt-0.5 text-2xl font-bold">
                   {tipe.hargaMin === tipe.hargaMax
                     ? formatRupiah(tipe.hargaMin)
                     : `${formatRupiah(tipe.hargaMin)}+`}
                   <span className="ml-1 text-xs font-medium text-muted-foreground">
-                    per month
+                    per bulan
                   </span>
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-muted-foreground">Size</dt>
+                <dt className="text-xs text-muted-foreground">Luas</dt>
                 <dd className="num mt-0.5 flex items-center gap-1.5 text-2xl font-bold">
                   <Ruler className="size-5 text-muted-foreground" aria-hidden />
                   {luas} m²
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-muted-foreground">Available</dt>
+                <dt className="text-xs text-muted-foreground">Tersedia</dt>
                 <dd className="num mt-0.5 text-2xl font-bold text-status-kosong">
                   {tipe.kosong}
                   <span className="ml-1 text-xs font-medium text-muted-foreground">
-                    of {tipe.rooms.length}
+                    dari {tipe.rooms.length}
                   </span>
                 </dd>
               </div>
@@ -163,15 +169,18 @@ function TipeDetail() {
             <Button
               asChild
               size="lg"
-              className="mt-8 h-12 gap-2 px-7 text-base"
+              className="group mt-8 h-12 gap-2 px-7 text-base transition-transform active:scale-[0.98]"
             >
               <a
                 href={waLinkForType(lokasi, tipe, catalog.config.wa_default)}
                 target="_blank"
                 rel="noreferrer"
               >
-                <MessageCircle className="size-5" aria-hidden />
-                Chat on WhatsApp
+                <MessageCircle
+                  className="cta-icon size-5 transition-transform group-hover:scale-110"
+                  aria-hidden
+                />
+                Chat via WhatsApp
               </a>
             </Button>
           </div>
@@ -179,11 +188,11 @@ function TipeDetail() {
 
         <section className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6">
           <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
-            Where {tipe.nama} rooms are
+            Letak kamar {tipe.nama}
           </h2>
           <p className="mt-2 max-w-xl leading-relaxed text-muted-foreground">
-            Other room types are dimmed so this one stands out. Tap an available
-            room to open WhatsApp.
+            Tipe kamar lain diredupkan supaya tipe ini menonjol. Ketuk kamar
+            yang tersedia untuk membuka WhatsApp.
           </p>
           <div className="mt-6">
             <RoomMap

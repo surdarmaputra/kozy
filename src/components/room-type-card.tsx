@@ -24,7 +24,7 @@ export function RoomTypeCard({
   const available = tipe.kosong > 0
 
   return (
-    <article className="flex flex-col overflow-hidden rounded-xl border border-border bg-card">
+    <article className="card-soft card-soft-hover flex flex-col overflow-hidden rounded-xl bg-card transition-shadow duration-200">
       <Photo
         src={tipe.foto}
         alt={`${tipe.nama} room at ${lokasi.nama}`}
@@ -48,7 +48,7 @@ export function RoomTypeCard({
               ? formatRupiah(tipe.hargaMin)
               : `${formatRupiah(tipe.hargaMin)}+`}
             <span className="block text-xs font-medium text-muted-foreground">
-              per month
+              per bulan
             </span>
           </p>
         </div>
@@ -63,7 +63,7 @@ export function RoomTypeCard({
             {tipe.kosong}
           </span>{' '}
           <span className="text-muted-foreground">
-            of <span className="num">{tipe.rooms.length}</span> rooms available
+            dari <span className="num">{tipe.rooms.length}</span> kamar tersedia
           </span>
         </p>
 
@@ -92,14 +92,20 @@ export function RoomTypeCard({
         ) : null}
 
         <div className="mt-auto flex flex-col gap-2 pt-1 sm:flex-row">
-          <Button asChild className="h-11 flex-1 gap-2">
+          <Button
+            asChild
+            className="group h-11 flex-1 gap-2 transition-transform active:scale-[0.98]"
+          >
             <a
               href={waLinkForType(lokasi, tipe, fallbackNumber)}
               target="_blank"
               rel="noreferrer"
             >
-              <MessageCircle className="size-4" aria-hidden />
-              Chat on WhatsApp
+              <MessageCircle
+                className="cta-icon size-4 transition-transform group-hover:scale-110"
+                aria-hidden
+              />
+              Chat via WhatsApp
             </a>
           </Button>
           <Button asChild variant="outline" className="h-11 flex-1">
@@ -107,7 +113,7 @@ export function RoomTypeCard({
               to="/locations/$slug/type/$type"
               params={{ slug: lokasi.slug, type: tipe.slug }}
             >
-              Room map
+              Denah kamar
             </Link>
           </Button>
         </div>

@@ -1,4 +1,4 @@
-"""Regenerates docs/kozy-sheet-template.xlsx from src/data/snapshot.json.
+"""Regenerates docs/kozy-sheet-template.xlsx from the dev seed src/data/snapshot.json.
 
     python3 scripts/make-sheet-template.py
 
@@ -9,6 +9,7 @@ and on /purge.
 """
 
 import json
+from pathlib import Path
 from openpyxl import Workbook
 from openpyxl.comments import Comment
 from openpyxl.formatting.rule import CellIsRule
@@ -16,7 +17,8 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.datavalidation import DataValidation
 
-DATA = json.load(open('/home/user/kozy/src/data/snapshot.json'))
+ROOT = Path(__file__).resolve().parent.parent
+DATA = json.load(open(ROOT / 'src' / 'data' / 'snapshot.json'))
 
 INK = '1C1917'
 GREEN = '1F6F4D'
@@ -266,6 +268,6 @@ r = step(
     'Kalau Sheet bermasalah, yang tampil adalah data terakhir yang tersimpan di kode.',
 )
 
-out = '/home/user/kozy/docs/kozy-sheet-template.xlsx'
+out = ROOT / 'docs' / 'kozy-sheet-template.xlsx'
 wb.save(out)
 print('saved', out)

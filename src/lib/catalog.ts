@@ -3,7 +3,8 @@ import { z } from 'zod'
 import { clearCatalogCache, getCatalog } from './sheet'
 
 /** Every page reads through this. The handler body is stripped from the client
- *  bundle, so the Sheet URL and the snapshot never ship to the browser. */
+ *  bundle, so the Sheet URL and the seed data never ship to the browser.
+ *  Resolves to null when the Sheet is unreachable and no copy has been saved. */
 export const loadCatalog = createServerFn({ method: 'GET' }).handler(() =>
   getCatalog(),
 )
@@ -15,7 +16,7 @@ export type PurgeResult = {
   /** Filled in after a successful purge so the client can confirm the Sheet was
    *  actually read, and see which rows were dropped, without calling anyone. */
   diagnostics?: {
-    source: 'sheet' | 'snapshot'
+    source: 'sheet' | 'seed' | 'cache'
     lokasi: number
     kamar: number
     skipped: Array<string>
@@ -30,18 +31,18 @@ export const purgeSheetCache = createServerFn({ method: 'GET' })
     if (!expected) {
       return {
         ok: false,
-        message: 'Purge is not switched on yet',
+        message: 'Fitur perbarui belum diaktifkan',
         detail:
-          'The PURGE_SECRET variable is empty on Netlify. Ask a developer to set it once and this page works from then on.',
+          'Variabel PURGE_SECRET masih kosong di Netlify. Minta developer mengisinya sekali, setelah itu halaman ini berfungsi.',
       }
     }
 
     if (data.secret !== expected) {
       return {
         ok: false,
-        message: 'Wrong secret',
+        message: 'Secret salah',
         detail:
-          'Open it again from the bookmark you were given at handover rather than typing it by hand.',
+          'Buka lagi dari bookmark yang diberikan saat serah terima, jangan diketik manual.',
       }
     }
 
@@ -60,6 +61,16 @@ export const purgeSheetCache = createServerFn({ method: 'GET' })
     // Re-read straight away so the page can report what the Sheet actually
     // returned, not just that a cache was dropped.
     const catalog = await getCatalog()
+
+    if (!catalog) {
+      return {
+        ok: true,
+        message: 'Cache dibersihkan, tetapi Sheet tidak bisa dibaca',
+        detail:
+          'Pembersihan berhasil. Belum ada salinan tersimpan sebagai cadangan, jadi pengunjung sementara melihat halaman tidak tersedia. Periksa lagi File > Share > Anyone with the link, Viewer, lalu buka tautan ini sekali lagi.',
+      }
+    }
+
     const diagnostics = {
       source: catalog.source,
       lokasi: catalog.lokasi.filter((item) => item.aktif).length,
@@ -70,17 +81,17 @@ export const purgeSheetCache = createServerFn({ method: 'GET' })
     if (cdnError) {
       return {
         ok: true,
-        message: 'Local cache cleared',
-        detail: `No CDN cache is reachable in this environment (${cdnError}).`,
+        message: 'Cache lokal dibersihkan',
+        detail: `Tidak ada cache CDN yang terjangkau di lingkungan ini (${cdnError}).`,
         diagnostics,
       }
     }
 
     return {
       ok: true,
-      message: 'The website is up to date',
+      message: 'Website sudah diperbarui',
       detail:
-        'Open a location page and pull down to refresh. The change is visible straight away.',
+        'Buka halaman lokasi lalu tarik ke bawah untuk menyegarkan. Perubahannya langsung terlihat.',
       diagnostics,
     }
   })

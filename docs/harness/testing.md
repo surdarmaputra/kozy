@@ -10,7 +10,9 @@ would freeze markup nobody has reviewed.
 ## #unit
 
 Location: `src/lib/__tests__/<area>.test.ts`. Any new `src/lib/*.ts` needs
-coverage in the same run.
+coverage in the same run — e.g. `store.ts` has `store.test.ts` (persist/recall
+round-trip, file recall after the in-memory copy is dropped, corrupt or
+empty-`lokasi` file rejected, silent degrade on an unwritable dir).
 
 Test the values a real sheet produces, not the happy path:
 
@@ -36,11 +38,17 @@ npm run build
 SHEET_ID=broken PURGE_SECRET=x node <serve dist/server/server.js>
 ```
 
-- a broken `SHEET_ID` still renders every page from the snapshot
-- `/purge` reports source, counts, and skipped rows in plain language
-- `Netlify-CDN-Cache-Control` and `Netlify-Cache-Tag` are on catalogue routes
-- no snapshot strings in `dist/client/assets/*.js`
-- light and dark, 390px and 1440px, no horizontal scroll
+- no `SHEET_ID` renders every page from the dev seed (`source: 'seed'`)
+- a broken `SHEET_ID` with a warm `.cache/catalog.json` renders `source: 'cache'`;
+  clear `.cache/` (and no Blobs) and every catalogue route shows the friendly
+  unavailable page at HTTP 200 with `Cache-Control: no-store`
+- `/purge` reports source, counts, and skipped rows in plain language — and
+  "could not be read" when the Sheet is unreachable and nothing is saved
+- `Netlify-CDN-Cache-Control: s-maxage=60` and `Netlify-Cache-Tag` are on
+  catalogue routes that resolved to data
+- no seed strings in `dist/client/assets/*.js`
+- the one light theme holds even with the OS set to dark, 390px and 1440px, no
+  horizontal scroll
 
 ## #fixtures
 

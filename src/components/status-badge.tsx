@@ -2,11 +2,12 @@ import { cn } from '#/lib/utils'
 import type { RoomStatus } from '#/lib/schema'
 
 /** The Sheet keeps its own vocabulary (kosong / dibooking / terisi) because the
- *  owner types those values. The site shows the English reading of them. */
+ *  owner types those values. The site shows a friendly reading of them, and this
+ *  map is the one place that reading is defined. */
 export const statusLabel: Record<RoomStatus, string> = {
-  kosong: 'Available',
-  dibooking: 'Reserved',
-  terisi: 'Occupied',
+  kosong: 'Tersedia',
+  dibooking: 'Dibooking',
+  terisi: 'Terisi',
 }
 
 const statusStyle: Record<RoomStatus, string> = {

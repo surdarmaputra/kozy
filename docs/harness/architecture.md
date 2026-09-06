@@ -2,17 +2,19 @@
 
 ## Layers
 
-| Layer                     | Responsibility                                   |
-| ------------------------- | ------------------------------------------------ |
-| `src/routes/**`           | loader + head + headers + page composition       |
-| `src/lib/catalog.ts`      | server fns, the only bridge from route to Sheet  |
-| `src/lib/sheet.ts`        | fetch, cache, snapshot fallback. **Server only** |
-| `src/lib/{csv,schema}.ts` | parse and validate raw rows                      |
-| `src/lib/select.ts`       | pure selectors over a parsed catalogue           |
-| `src/components/**`       | presentation only, no fetching, no `process.env` |
+| Layer                     | Responsibility                                              |
+| ------------------------- | ----------------------------------------------------------- |
+| `src/routes/**`           | loader + head + headers + page composition                  |
+| `src/lib/catalog.ts`      | server fns, the only bridge from route to Sheet             |
+| `src/lib/sheet.ts`        | fetch, 60s cache, last-good fallback. **Server only**       |
+| `src/lib/store.ts`        | last-good persistence: memory, file, Blobs. **Server only** |
+| `src/lib/{csv,schema}.ts` | parse and validate raw rows                                 |
+| `src/lib/select.ts`       | pure selectors over a parsed catalogue                      |
+| `src/components/**`       | presentation only, no fetching, no `process.env`            |
 
-Import direction is one way: routes → catalog → sheet → schema/csv.
-Components may import `select.ts`, never `sheet.ts` or `catalog.ts` internals.
+Import direction is one way: routes → catalog → sheet → store → schema/csv.
+Components may import `select.ts`, never `sheet.ts`, `store.ts`, or
+`catalog.ts` internals.
 
 ## #sheet-contract
 
@@ -41,29 +43,44 @@ Column semantics that are easy to get wrong:
 
 ## #resilience
 
-Three layers. All three must keep working; a change that weakens one is a
-regression even when tests pass.
+Four layers. All must keep working; a change that weakens one is a regression
+even when tests pass. The guiding rule: **a stale-but-real copy beats an error,
+and an honest error beats wrong data.**
 
 1. **Skip the row.** `parseRows` validates each row alone. A failure is pushed
    to `skipped` with its 1-based sheet row number and reported at `/purge`.
    Nothing throws.
-2. **Snapshot.** Fetch failure, revoked sharing, non-CSV response, or an empty
-   `lokasi` tab → `src/data/snapshot.json`. Regenerate with `npm run snapshot`;
-   never hand-edit. `scripts/make-sheet-template.py` rebuilds the client's
-   `.xlsx` from the same file so the two cannot drift.
-3. **Stale-while-revalidate.** The CDN serves the last good HTML during
+2. **Last good copy.** Fetch failure, revoked sharing, non-CSV response, or an
+   empty `lokasi` tab → the last catalogue that was read successfully, from
+   `src/lib/store.ts`: in-process memory, then a file under `CACHE_DIR`
+   (default `.cache/`), then Netlify Blobs (only when
+   `NETLIFY_DEPLOYMENT === 'true' || NETLIFY`). Served with `source: 'cache'`.
+   `store.persist()` writes all three on every successful fetch;
+   `clearCatalogCache()` (a `/purge`) never evicts them.
+3. **Friendly unavailable page.** Nothing has ever been read successfully (a
+   cold instance mid-outage, or a first deploy before the Sheet is shared) →
+   `getCatalog()` returns `null` and each catalogue route renders
+   `CatalogUnavailable` inside the normal shell at HTTP 200 with `no-store`.
+4. **Stale-while-revalidate.** The CDN serves the last good HTML during
    revalidation.
 
-Load on Google is one fetch per tab per 5 minutes per instance, constant with
+`src/data/snapshot.json` is **not** a resilience layer. It is a dev seed,
+rendered (`source: 'seed'`) only when `SHEET_ID` is unset — local dev and the
+CI build. Regenerate with `npm run snapshot`; never hand-edit.
+`scripts/make-sheet-template.py` rebuilds the client's `.xlsx` from the same
+file so the two cannot drift.
+
+Load on Google is one fetch per tab per 60 seconds per instance, constant with
 traffic. Do not add a per-request fetch.
 
 ## #server-only
 
-`sheet.ts` imports `snapshot.json` and reads `process.env.SHEET_ID`. It must
-never reach the browser. `createServerFn` in `catalog.ts` strips the handler
-from the client bundle; importing `sheet.ts` from a component defeats that.
+`sheet.ts` reads `process.env.SHEET_ID` and dynamically imports the dev seed;
+`store.ts` uses `node:fs/promises` and `@netlify/blobs`. Neither may reach the
+browser. `createServerFn` in `catalog.ts` strips the handler from the client
+bundle; importing `sheet.ts` or `store.ts` from a component defeats that.
 
-Check after touching either file:
+Check after touching any of them:
 
 ```bash
 npm run build && grep -l "Batam Centre" dist/client/assets/*.js   # must find nothing
@@ -72,9 +89,12 @@ npm run build && grep -l "Batam Centre" dist/client/assets/*.js   # must find no
 ## #server-fns
 
 `loadCatalog` and `purgeSheetCache` in `src/lib/catalog.ts`. Route loaders call
-these, never `getCatalog` directly. `purgeSheetCache` validates its secret,
-clears the in-process cache, calls Netlify `purgeCache({ tags: ['sheet'] })`,
-then re-reads so `/purge` can report what the Sheet actually returned.
+these, never `getCatalog` directly. `loadCatalog` resolves to `Catalog | null`
+(`null` = Sheet unreachable and no saved copy). `purgeSheetCache` validates its
+secret, clears the in-process cache (not the persisted copy), calls Netlify
+`purgeCache({ tags: ['sheet'] })`, then re-reads so `/purge` can report what the
+Sheet actually returned — including "could not be read" when the re-read is
+`null`.
 
 ## #routing
 
@@ -88,13 +108,18 @@ thrown 404 — the Sheet is user-edited and typos are expected.
 
 ## #caching
 
-Every catalogue route returns `sheetCacheHeaders` from `src/lib/http.ts`:
+Every catalogue route returns `sheetCacheHeaders` from `src/lib/http.ts` when
+its loader resolved to data:
 
 ```
-Netlify-CDN-Cache-Control: s-maxage=300, stale-while-revalidate=86400
+Netlify-CDN-Cache-Control: s-maxage=60, stale-while-revalidate=86400
 Netlify-Cache-Tag: sheet
 Cache-Control: public, max-age=0, must-revalidate
 ```
+
+When the loader resolved to `null` (the unavailable page) the route returns
+`noStoreHeaders` instead, so recovery is visible the moment the Sheet is back:
+`headers: ({ loaderData }) => loaderData == null ? noStoreHeaders : sheetCacheHeaders`.
 
 `/purge` is the exception and sends `no-store` plus `X-Robots-Tag: noindex`.
 Route-level `headers()` does reach the response through the Netlify adapter;
@@ -104,4 +129,5 @@ this was verified against the built SSR bundle, not assumed.
 
 `.github/workflows/ci.yml` runs the same steps as `npm run verify`, on push to
 `main` and on every PR. If you add a gate, add it to both or they drift. The
-build runs without `SHEET_ID` deliberately, so CI exercises the snapshot path.
+build runs without `SHEET_ID` deliberately, so CI exercises the dev-seed path
+(`source: 'seed'`).

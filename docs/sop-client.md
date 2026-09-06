@@ -12,7 +12,7 @@ tidak perlu menghubungi developer.
 4. Buka website, tarik layar ke bawah untuk refresh. Warna kotak kamar di denah
    sudah berubah.
 
-Tanpa langkah 3 pun perubahan tetap muncul sendiri dalam 5 menit.
+Tanpa langkah 3 pun perubahan tetap muncul sendiri dalam 1-2 menit.
 Bookmark itu hanya untuk yang tidak mau menunggu.
 
 ## 2. Mengubah harga
@@ -59,9 +59,10 @@ Datanya tetap tersimpan dan bisa ditampilkan lagi kapan saja.
 
 Buka bookmark **Perbarui website**. Halaman itu menyebutkan:
 
-- **Data source**: harus tertulis "Google Sheet". Kalau tertulis "Committed snapshot", berarti website tidak bisa membaca Sheet. Cek File > Share, pastikan masih **Anyone with the link, Viewer**.
-- **Read**: jumlah lokasi dan kamar yang berhasil dibaca.
+- **Sumber data**: harus tertulis "Google Sheet (langsung)". Kalau tertulis "Salinan tersimpan, Sheet tidak terjangkau" atau "Data contoh, SHEET_ID belum diisi", berarti website tidak bisa membaca Sheet. Cek File > Share, pastikan masih **Anyone with the link, Viewer**.
+- **Terbaca**: jumlah lokasi dan kamar yang berhasil dibaca.
 - **Baris yang dilewati**: nomor baris yang datanya belum lengkap. Perbaiki baris itu di Sheet, lalu buka bookmark lagi.
 
-Website tidak pernah kosong. Kalau Sheet bermasalah, yang tampil adalah
-data terakhir yang tersimpan di kode.
+Kalau Sheet bermasalah, yang tampil adalah salinan terakhir yang berhasil
+dibaca website. Kalau website belum pernah berhasil membaca Sheet sama sekali,
+muncul halaman "sementara tidak tersedia" sampai Sheet bisa dibaca lagi.

@@ -78,7 +78,8 @@ Dipasang sekali oleh developer, mencegah salah ketik dari HP.
 ## Sharing
 
 File > Share > General access > **Anyone with the link** > **Viewer**.
-Tanpa itu website tidak bisa membaca datanya dan akan menampilkan data cadangan.
+Tanpa itu website tidak bisa membaca datanya dan akan menampilkan salinan
+terakhir yang berhasil dibaca.
 
 ## Toleransi kesalahan
 
@@ -86,5 +87,6 @@ Tanpa itu website tidak bisa membaca datanya dan akan menampilkan data cadangan.
 - `status` yang tidak dikenali dianggap `terisi`, supaya kamar tidak salah dijual.
 - `tipe` yang kosong dianggap `Standard`.
 - Harga boleh ditulis `Rp 1.850.000`, tetap terbaca sebagai angka.
-- Kolom yang hilang atau sharing yang dicabut membuat website memakai
-  `src/data/snapshot.json` yang tersimpan di kode. Halaman tidak pernah kosong.
+- Kolom yang hilang atau sharing yang dicabut membuat website memakai salinan
+  terakhir yang berhasil dibaca. Kalau belum pernah berhasil, muncul halaman
+  "sementara tidak tersedia" sampai Sheet bisa dibaca lagi.

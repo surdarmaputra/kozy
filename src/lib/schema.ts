@@ -106,8 +106,9 @@ export type Catalog = {
   lokasi: Array<Lokasi>
   kamar: Array<Kamar>
   /** Where the render came from, surfaced on /purge so the client can tell
-   *  "my edit is live" from "we are serving the committed snapshot". */
-  source: 'sheet' | 'snapshot'
+   *  "my edit is live" (`sheet`) from "the Sheet is unreachable and this is the
+   *  last copy we read" (`cache`) or "no SHEET_ID, this is sample data" (`seed`). */
+  source: 'sheet' | 'seed' | 'cache'
   fetchedAt: string
   skipped: Array<string>
 }

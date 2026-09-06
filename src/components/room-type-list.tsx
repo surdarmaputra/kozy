@@ -25,8 +25,8 @@ export function RoomTypeList({
   if (types.length === 0) {
     return (
       <EmptyState
-        title="No rooms listed yet"
-        body="Room data for this location has not been filled in yet. Send a WhatsApp message for current availability."
+        title="Belum ada kamar yang terdaftar"
+        body="Data kamar untuk lokasi ini belum diisi. Kirim pesan WhatsApp untuk menanyakan ketersediaan terbaru."
       />
     )
   }
@@ -36,27 +36,28 @@ export function RoomTypeList({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
-            Room types
+            Tipe kamar
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Rooms of the same type share a price, a size, and a facility list.
+            Kamar dengan tipe sama punya harga, luas, dan daftar fasilitas yang
+            sama.
           </p>
         </div>
         <label className="flex cursor-pointer items-center gap-3 self-start rounded-lg border border-border bg-card px-4 py-2.5 sm:self-auto">
           <Switch
             checked={onlyAvailable}
             onCheckedChange={setOnlyAvailable}
-            aria-label="Show only types with an available room"
+            aria-label="Tampilkan hanya tipe yang punya kamar tersedia"
           />
-          <span className="text-sm font-medium">Available only</span>
+          <span className="text-sm font-medium">Yang tersedia saja</span>
         </label>
       </div>
 
       {visible.length === 0 ? (
         <div className="mt-8">
           <EmptyState
-            title="Every room is taken"
-            body="Turn the filter off to see every type, or send a message and we will tell you when one frees up."
+            title="Semua kamar sedang terisi"
+            body="Matikan filter untuk melihat semua tipe, atau kirim pesan dan kami kabari begitu ada yang kosong."
           />
         </div>
       ) : (

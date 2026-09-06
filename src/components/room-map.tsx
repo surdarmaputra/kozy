@@ -34,10 +34,10 @@ export function RoomMap({
         {floors.map((floor) => (
           <div
             key={floor.lantai}
-            className="rounded-xl border border-border bg-card p-4 sm:p-5"
+            className="card-soft rounded-xl bg-card p-4 sm:p-5"
           >
             <p className="text-xs font-semibold text-muted-foreground">
-              Floor <span className="num">{floor.lantai}</span>
+              Lantai <span className="num">{floor.lantai}</span>
             </p>
             <ul className="mt-3 flex flex-wrap gap-2">
               {floor.rooms.map((room) => (
@@ -105,7 +105,7 @@ function RoomTile({
       target="_blank"
       rel="noreferrer"
       title={summary}
-      aria-label={`Chat on WhatsApp about room ${summary}`}
+      aria-label={`Chat via WhatsApp soal kamar ${summary}`}
       className={cn(
         shell,
         'transition-transform duration-150 hover:-translate-y-0.5 active:translate-y-0',

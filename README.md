@@ -2,8 +2,9 @@
 
 A multi-location room catalogue. Availability is read from a Google Sheet at
 request time, server-rendered, and cached at Netlify's CDN. The owner changes a
-room's status from their phone in the Sheet; the site updates within five
-minutes, or instantly via `/purge`. There is no deploy, no CMS, and no database.
+room's status from their phone in the Sheet; the site catches up on its own
+within about one to two minutes, or instantly via `/purge`. There is no deploy,
+no CMS, and no database.
 
 **The Google Sheet is the admin panel.**
 
@@ -12,8 +13,9 @@ minutes, or instantly via `/purge`. There is no deploy, no CMS, and no database.
 ## Quick start
 
 Runs with no configuration. Without `SHEET_ID` the app serves the committed
-sample data in `src/data/snapshot.json`, so you can develop without access to
-any spreadsheet.
+sample seed in `src/data/snapshot.json`, so you can develop without access to
+any spreadsheet. (With a `SHEET_ID` set, that file is never used — a failed
+fetch falls back to the last copy read successfully, not to the seed.)
 
 ```bash
 npm install
@@ -34,12 +36,14 @@ cp .env.example .env
 
 ## Environment variables
 
-Two, both server-side only. Neither is ever sent to the browser.
+Server-side only. None is ever sent to the browser.
 
-| Variable       | Required   | Used by                                | If missing                          |
-| -------------- | ---------- | -------------------------------------- | ----------------------------------- |
-| `SHEET_ID`     | Production | `src/lib/sheet.ts`, `npm run snapshot` | Serves `src/data/snapshot.json`     |
-| `PURGE_SECRET` | Production | `/purge`                               | `/purge` says it is not switched on |
+| Variable             | Required   | Used by                                | If missing                                    |
+| -------------------- | ---------- | -------------------------------------- | --------------------------------------------- |
+| `SHEET_ID`           | Production | `src/lib/sheet.ts`, `npm run snapshot` | Serves the dev seed `src/data/snapshot.json`  |
+| `PURGE_SECRET`       | Production | `/purge`                               | `/purge` says it is not switched on           |
+| `CACHE_DIR`          | No         | `src/lib/store.ts`                     | Last-good copy is written under `.cache/`     |
+| `NETLIFY_DEPLOYMENT` | No         | `vite.config.ts`, `src/lib/store.ts`   | Local dev; no edge emulator, no Netlify Blobs |
 
 ### `SHEET_ID` — how to get the value
 
@@ -65,8 +69,9 @@ The Sheet must also be readable without a login. In the Sheet:
 **File → Share → General access → Anyone with the link → Viewer.**
 
 Without that, Google returns a sign-in page instead of CSV and the site falls
-back to the snapshot. There is no GCP project, no service account, and no API
-key anywhere in this setup.
+back to the last copy it read successfully (or a friendly unavailable page if it
+never got one). There is no GCP project, no service account, and no API key
+anywhere in this setup.
 
 ### `PURGE_SECRET` — how to produce the value
 
@@ -112,15 +117,16 @@ rather than the bare secret.
    # open http://localhost:3000/purge?secret=<your PURGE_SECRET>
    ```
 
-   The page reports which source it used. "Google Sheet" means it worked.
-   "Committed snapshot" means it could not read the Sheet — the page names the
-   reason, and it is almost always step 2.
+   The page reports which source it used. "Google Sheet (live)" means it worked.
+   "Saved copy, Sheet unreachable" or "Sample data, no SHEET_ID" means it could
+   not read the Sheet — the page names the reason, and it is almost always
+   step 2.
 
-5. **Refresh the committed fallback** so the offline copy matches real data:
+5. **Refresh the dev seed** so the offline copy matches real data:
 
    ```bash
    npm run snapshot
-   git commit -am "chore: refresh snapshot"
+   git commit -am "chore: refresh dev seed"
    ```
 
 ---
@@ -132,7 +138,7 @@ npm run dev        # dev server on :3000, loads .env
 npm run verify     # the gate: format, lint, typecheck, tests, build, route-tree drift
 npm run build      # production build (client + SSR bundle)
 npm run test       # unit tests
-npm run snapshot   # rewrite src/data/snapshot.json from the live Sheet
+npm run snapshot   # rewrite the dev seed src/data/snapshot.json from the live Sheet
 ```
 
 `npm run verify` runs the same steps as CI in the same order. Green locally
@@ -159,7 +165,10 @@ means green in CI.
    only picks up new variables on the next build, so redeploy after adding them.
 
 3. **Deploy.** The SSR bundle is emitted to a Netlify Function automatically by
-   `@netlify/vite-plugin-tanstack-start`; there is nothing to configure.
+   `@netlify/vite-plugin-tanstack-start`; there is nothing to configure. The
+   last-good copy is stored in Netlify Blobs (no setup — the function has a store
+   bound automatically); set `NETLIFY_DEPLOYMENT=true` if you also want the edge
+   emulator when running `netlify dev` locally.
 
 4. **Give the owner their purge bookmark.** After the first deploy, build this
    URL and have them bookmark it as something like "Refresh the website":
@@ -177,33 +186,35 @@ means green in CI.
 
 ```bash
 curl -sI https://<your-domain>/ | grep -i netlify
-# expect: netlify-cdn-cache-control: s-maxage=300, stale-while-revalidate=86400
+# expect: netlify-cdn-cache-control: s-maxage=60, stale-while-revalidate=86400
 #         netlify-cache-tag: sheet
 ```
 
-Then open `/purge?secret=...` and confirm it reports **Google Sheet** as the data
-source, with the location and room counts you expect.
+Then open `/purge?secret=...` and confirm it reports **Google Sheet (live)** as
+the data source, with the location and room counts you expect.
 
 ### Why the build ignores .env
 
-`npm run build` never reads `SHEET_ID`, on purpose. The build must succeed
-against the committed snapshot, because that is exactly the path production falls
-back to when the Sheet is unreachable. CI builds without the variable for the
-same reason. Data is fetched at request time, not at build time, so a build never
-bakes in stale availability.
+`npm run build` never reads `SHEET_ID`, on purpose. Data is fetched at request
+time, not at build time, so a build never bakes in stale availability. Without
+the variable the build renders the committed dev seed, which keeps CI honest
+without needing Sheet access. Production always has `SHEET_ID` set; if the Sheet
+is unreachable there it serves the last copy it read successfully, never the
+seed.
 
 ---
 
 ## Troubleshooting
 
-| Symptom                                      | Cause and fix                                                                                                         |
-| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `/purge` says "Committed snapshot"           | The Sheet is not readable. Re-check File → Share → Anyone with the link, Viewer. The page names the underlying error. |
-| `/purge` says "Purge is not switched on yet" | `PURGE_SECRET` is unset in that environment. Add it in Netlify and redeploy.                                          |
-| `/purge` says "Wrong secret"                 | The URL's `secret=` does not match `PURGE_SECRET`. Use the bookmark rather than typing it.                            |
-| Edits do not appear                          | Cached for up to 5 minutes. Open the purge bookmark, then reload.                                                     |
-| Rows silently missing                        | A row failed validation. `/purge` lists the sheet row numbers and why. Rows with `aktif=FALSE` are hidden by design.  |
-| Dev server exits on Netlify Edge Functions   | The Netlify plugin's bundled Deno failed to start in your environment. Builds and production are unaffected.          |
+| Symptom                                       | Cause and fix                                                                                                                                          |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/purge` says "Saved copy, Sheet unreachable" | The Sheet is not readable; visitors see the last good copy. Re-check File → Share → Anyone with the link, Viewer. The page names the underlying error. |
+| `/purge` says "could not be read"             | The Sheet is not readable and nothing was ever saved. Visitors see a temporary unavailable page. Fix sharing, then reopen `/purge`.                    |
+| `/purge` says "Purge is not switched on yet"  | `PURGE_SECRET` is unset in that environment. Add it in Netlify and redeploy.                                                                           |
+| `/purge` says "Wrong secret"                  | The URL's `secret=` does not match `PURGE_SECRET`. Use the bookmark rather than typing it.                                                             |
+| Edits do not appear                           | Cached. Wait ~1–2 minutes and reload twice, or open the purge bookmark for an immediate refresh.                                                       |
+| Rows silently missing                         | A row failed validation. `/purge` lists the sheet row numbers and why. Rows with `aktif=FALSE` are hidden by design.                                   |
+| Dev server exits on Netlify Edge Functions    | The Netlify plugin's bundled Deno failed to start in your environment. Builds and production are unaffected.                                           |
 
 ---
 
@@ -234,37 +245,68 @@ available tile is a `wa.me` link carrying that room's code, type and price.
 
 ### Cache and purge
 
-Every catalogue page sends:
+Every catalogue page that resolved to data sends:
 
 ```
-Netlify-CDN-Cache-Control: s-maxage=300, stale-while-revalidate=86400
+Netlify-CDN-Cache-Control: s-maxage=60, stale-while-revalidate=86400
 Netlify-Cache-Tag: sheet
 ```
 
-Netlify holds the HTML for 5 minutes and serves it stale for up to a day while
-revalidating, so a slow or broken Sheet never reaches a visitor.
-`/purge?secret=...` calls `purgeCache({ tags: ['sheet'] })` and clears the
-in-process cache, making a change visible immediately.
+Netlify holds the HTML for 60 seconds and serves it stale for up to a day while
+revalidating, so a slow or broken Sheet never reaches a visitor. The unavailable
+page (see below) sends `no-store` instead, so recovery shows immediately.
 
-Load on Google is capped at one fetch per tab per 5 minutes per instance,
+Load on Google is capped at one fetch per tab per 60 seconds per instance,
 constant with traffic.
 
-### Three layers of resilience
+#### How soon does a Sheet edit show up?
+
+Two caches sit in front of the Sheet:
+
+| Layer                       | Window                                         | Behaviour                                                                      |
+| --------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------ |
+| In-process (per instance)   | 60 s TTL                                       | one Sheet fetch per tab per 60 s; last good copy served while it refetches     |
+| Netlify CDN (rendered HTML) | `s-maxage=60` + `stale-while-revalidate=86400` | fresh for 60 s, then the old page is served for up to 24 h while it re-renders |
+
+**If you do not purge, just wait.** After the 60-second window the first visitor
+still gets the old page but triggers a background re-render; the next visitor
+gets the new one. In practice an edit lands in **about 1–2 minutes** on a site
+with steady traffic. With little or no traffic it can sit longer — nothing
+re-renders until someone asks for the page — but a visitor is never made to wait
+for a slow render (that is the 24 h stale window).
+
+**If you need it live now**, open `/purge?secret=...`. It calls
+`purgeCache({ tags: ['sheet'] })` and clears the in-process cache, so the very
+next request re-renders from the Sheet. `PURGE_SECRET` must be set for this to
+work; if it is left unset, the wait above is the only path and `/purge` just
+reports that it is switched off.
+
+### Four layers of resilience
+
+The rule: a stale-but-real copy beats an error, and an honest error beats wrong
+data.
 
 1. **Skip the row.** Every row is validated by Zod on its own. A row that fails
    is dropped, the rest still render, and its row number is reported at `/purge`.
-2. **Snapshot.** If the fetch fails, sharing is revoked, or the `lokasi` tab is
-   empty, the app falls back to the committed `src/data/snapshot.json`.
-3. **Stale-while-revalidate.** The CDN serves the previous HTML during
+2. **Last good copy.** If the fetch fails, sharing is revoked, or the `lokasi`
+   tab is empty, the app serves the last catalogue it read successfully — held
+   in memory, in a file under `CACHE_DIR` (default `.cache/`), and on Netlify in
+   Blobs. Shown as "Saved copy" on `/purge`. The committed `snapshot.json` is a
+   dev seed, not part of this chain.
+3. **Unavailable page.** If nothing has ever been read successfully, each
+   catalogue route renders a friendly "temporarily unavailable" page at HTTP 200
+   rather than showing stale or wrong data.
+4. **Stale-while-revalidate.** The CDN serves the previous HTML during
    revalidation.
 
 ### Language
 
-The site is in English. The Sheet keeps its Indonesian tab names, column names
-and status values (`kosong`, `dibooking`, `terisi`), because that is the owner's
-own vocabulary and what the handover docs describe. The three status values are
-mapped for display in one place, `statusLabel` in
-`src/components/status-badge.tsx`.
+The site is in Indonesian. The Sheet keeps its Indonesian tab names, column
+names and status values (`kosong`, `dibooking`, `terisi`), because that is the
+owner's own vocabulary and what the handover docs describe. The three status
+values are mapped to their display label in one place, `statusLabel` in
+`src/components/status-badge.tsx`. `docs/harness/**`, this README, and code
+comments stay English for developers.
 
 ---
 
@@ -273,7 +315,7 @@ mapped for display in one place, `statusLabel` in
 - TanStack Start (SSR, file-based routing) on Vite
 - Tailwind v4 + shadcn/ui
 - Zod for per-row Sheet validation
-- Netlify Functions for SSR and `purgeCache`
+- Netlify Functions for SSR and `purgeCache`, Netlify Blobs for the last-good copy
 
 ## Working on this repo
 
