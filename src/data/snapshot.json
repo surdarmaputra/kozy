@@ -397,5 +397,56 @@
       "catatan": "",
       "aktif": "TRUE"
     }
+  ],
+  "denah": [
+    {
+      "lokasi_slug": "batam-centre",
+      "lantai": "1",
+      "baris": "1",
+      "sel": "pintu, ., ., .",
+      "arah": "utara"
+    },
+    {
+      "lokasi_slug": "batam-centre",
+      "lantai": "1",
+      "baris": "2",
+      "sel": "A1, A2, A3, tangga",
+      "arah": ""
+    },
+    {
+      "lokasi_slug": "batam-centre",
+      "lantai": "1",
+      "baris": "3",
+      "sel": "lorong, lorong, lorong, lorong",
+      "arah": ""
+    },
+    {
+      "lokasi_slug": "batam-centre",
+      "lantai": "1",
+      "baris": "4",
+      "sel": "A4, A5, A6, lift",
+      "arah": ""
+    },
+    {
+      "lokasi_slug": "batam-centre",
+      "lantai": "2",
+      "baris": "1",
+      "sel": "B1, B2, B3, WC",
+      "arah": ""
+    },
+    {
+      "lokasi_slug": "batam-centre",
+      "lantai": "2",
+      "baris": "2",
+      "sel": "lorong, lorong, lorong, lorong",
+      "arah": ""
+    },
+    {
+      "lokasi_slug": "batam-centre",
+      "lantai": "2",
+      "baris": "3",
+      "sel": "B4, B5, B6, tangga",
+      "arah": ""
+    }
   ]
 }

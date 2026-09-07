@@ -1,5 +1,6 @@
 'use client'
 
+import { ArrowUp, DoorClosed, Footprints, MoveVertical } from 'lucide-react'
 import {
   Popover,
   PopoverContent,
@@ -9,6 +10,7 @@ import { StatusLegend, statusLabel } from '#/components/status-badge'
 import { formatRupiah } from '#/lib/format'
 import { groupByFloor, tipeSlug } from '#/lib/select'
 import { cn } from '#/lib/utils'
+import type { FloorPlan, PlanCell, PlanMarker } from '#/lib/select'
 import type { Kamar } from '#/lib/schema'
 
 /**
@@ -20,14 +22,21 @@ import type { Kamar } from '#/lib/schema'
  * `highlight` dims every room outside one type and makes those rooms inert:
  * tapping one only explains why it is dimmed. That is how the type selector
  * shows where a type actually sits in the building.
+ *
+ * `plans` is optional. A floor with a drawing renders as a grid with its
+ * corridors, doors, stairs and lift, and a compass when the owner set one. A
+ * floor with no drawing, or no `plans` at all, renders as the plain wrap of
+ * tiles it always has.
  */
 export function RoomMap({
   rooms,
+  plans,
   highlight,
   highlightLabel,
   onSelectRoom,
 }: {
   rooms: Array<Kamar>
+  plans?: Array<FloorPlan>
   highlight?: string
   highlightLabel?: string
   onSelectRoom: (room: Kamar) => void
@@ -41,34 +50,148 @@ export function RoomMap({
     <div className="max-w-3xl">
       <StatusLegend hasNotes={hasNotes} />
       <div className="mt-6 space-y-4">
-        {floors.map((floor) => (
-          <div
-            key={floor.lantai}
-            className="card-soft rounded-xl bg-card p-4 sm:p-5"
-          >
-            <p className="text-xs font-semibold text-muted-foreground">
-              Lantai <span className="num">{floor.lantai}</span>
-            </p>
-            <ul className="mt-3 flex flex-wrap gap-2">
-              {floor.rooms.map((room) => (
-                <li key={room.kode}>
-                  {highlight !== undefined &&
-                  tipeSlug(room.tipe) !== highlight ? (
-                    <DimmedTile
-                      room={room}
-                      typeLabel={highlightLabel ?? 'yang dipilih'}
-                    />
-                  ) : (
-                    <RoomTile room={room} onOpen={() => onSelectRoom(room)} />
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+        {floors.map((floor) => {
+          const plan = plans?.find((item) => item.lantai === floor.lantai)
+          return (
+            <div
+              key={floor.lantai}
+              className="card-soft rounded-xl bg-card p-4 sm:p-5"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs font-semibold text-muted-foreground">
+                  Lantai <span className="num">{floor.lantai}</span>
+                </p>
+                {plan && plan.arah !== '' ? <Compass arah={plan.arah} /> : null}
+              </div>
+
+              {plan ? (
+                <PlanGrid
+                  plan={plan}
+                  highlight={highlight}
+                  highlightLabel={highlightLabel}
+                  onSelectRoom={onSelectRoom}
+                />
+              ) : (
+                <ul className="mt-3 flex flex-wrap gap-2">
+                  {floor.rooms.map((room) => (
+                    <li key={room.kode}>
+                      <RoomOrDimmed
+                        room={room}
+                        highlight={highlight}
+                        highlightLabel={highlightLabel}
+                        onSelectRoom={onSelectRoom}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )
+        })}
       </div>
     </div>
   )
+}
+
+function PlanGrid({
+  plan,
+  highlight,
+  highlightLabel,
+  onSelectRoom,
+}: {
+  plan: FloorPlan
+  highlight?: string
+  highlightLabel?: string
+  onSelectRoom: (room: Kamar) => void
+}) {
+  return (
+    <div className="mt-3">
+      <div
+        role="group"
+        aria-label={`Denah lantai ${plan.lantai}`}
+        className="overflow-x-auto pb-1"
+      >
+        <div className="w-max min-w-full space-y-2">
+          {plan.rows.map((row, rowIndex) => (
+            <div key={rowIndex} className="flex gap-2">
+              {row.map((cell, cellIndex) => (
+                <PlanCellView
+                  key={cellIndex}
+                  cell={cell}
+                  highlight={highlight}
+                  highlightLabel={highlightLabel}
+                  onSelectRoom={onSelectRoom}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {plan.unmapped.length > 0 ? (
+        <div className="mt-3 border-t border-dashed border-border pt-3">
+          <p className="text-[0.7rem] font-semibold text-muted-foreground">
+            Belum dipetakan
+          </p>
+          <ul className="mt-2 flex flex-wrap gap-2">
+            {plan.unmapped.map((room) => (
+              <li key={room.kode}>
+                <RoomOrDimmed
+                  room={room}
+                  highlight={highlight}
+                  highlightLabel={highlightLabel}
+                  onSelectRoom={onSelectRoom}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+function PlanCellView({
+  cell,
+  highlight,
+  highlightLabel,
+  onSelectRoom,
+}: {
+  cell: PlanCell
+  highlight?: string
+  highlightLabel?: string
+  onSelectRoom: (room: Kamar) => void
+}) {
+  if (cell.kind === 'room')
+    return (
+      <RoomOrDimmed
+        room={cell.room}
+        highlight={highlight}
+        highlightLabel={highlightLabel}
+        onSelectRoom={onSelectRoom}
+      />
+    )
+  if (cell.kind === 'marker') return <MarkerCell marker={cell.marker} />
+  if (cell.kind === 'spot') return <SpotCell label={cell.label} />
+  return <span aria-hidden className="block h-16 w-[4.5rem] shrink-0" />
+}
+
+function RoomOrDimmed({
+  room,
+  highlight,
+  highlightLabel,
+  onSelectRoom,
+}: {
+  room: Kamar
+  highlight?: string
+  highlightLabel?: string
+  onSelectRoom: (room: Kamar) => void
+}) {
+  if (highlight !== undefined && tipeSlug(room.tipe) !== highlight)
+    return (
+      <DimmedTile room={room} typeLabel={highlightLabel ?? 'yang dipilih'} />
+    )
+  return <RoomTile room={room} onOpen={() => onSelectRoom(room)} />
 }
 
 const tileStatus: Record<Kamar['status'], string> = {
@@ -79,7 +202,7 @@ const tileStatus: Record<Kamar['status'], string> = {
 }
 
 const tileShell =
-  'relative flex h-16 w-[4.5rem] flex-col items-center justify-center gap-0.5 rounded-lg border text-center'
+  'relative flex h-16 w-[4.5rem] shrink-0 flex-col items-center justify-center gap-0.5 rounded-lg border text-center'
 
 function TileFace({ room }: { room: Kamar }) {
   return (
@@ -140,5 +263,82 @@ function DimmedTile({ room, typeLabel }: { room: Kamar; typeLabel: string }) {
         {message}
       </PopoverContent>
     </Popover>
+  )
+}
+
+const markerLabel: Record<PlanMarker, string> = {
+  pintu: 'Pintu',
+  tangga: 'Tangga',
+  lift: 'Lift',
+  lorong: 'Lorong',
+}
+
+function MarkerCell({ marker }: { marker: PlanMarker }) {
+  if (marker === 'lorong')
+    return (
+      <span
+        aria-label="Lorong"
+        className="flex h-16 w-[4.5rem] shrink-0 items-center justify-center rounded-lg border border-dashed border-border bg-muted text-[0.65rem] font-medium text-muted-foreground"
+      >
+        Lorong
+      </span>
+    )
+
+  const Icon =
+    marker === 'pintu'
+      ? DoorClosed
+      : marker === 'lift'
+        ? MoveVertical
+        : Footprints
+
+  return (
+    <span
+      aria-label={markerLabel[marker]}
+      className={cn(
+        tileShell,
+        'border-border bg-secondary text-secondary-foreground',
+      )}
+    >
+      <Icon className="size-4" aria-hidden />
+      <span className="text-[0.65rem] font-medium">{markerLabel[marker]}</span>
+    </span>
+  )
+}
+
+function SpotCell({ label }: { label: string }) {
+  return (
+    <span
+      className={cn(
+        tileShell,
+        'border-dashed border-border bg-secondary/60 px-1 text-muted-foreground',
+      )}
+    >
+      <span className="text-[0.65rem] leading-tight font-medium break-words">
+        {label}
+      </span>
+    </span>
+  )
+}
+
+const arahRotation: Record<string, number> = {
+  utara: 0,
+  timur: 90,
+  selatan: 180,
+  barat: 270,
+}
+
+function Compass({ arah }: { arah: string }) {
+  return (
+    <span
+      title={`Arah atas denah menghadap ${arah}`}
+      className="flex items-center gap-1 rounded-md bg-secondary px-1.5 py-1 text-[0.65rem] font-semibold text-secondary-foreground"
+    >
+      <ArrowUp
+        className="size-3"
+        style={{ transform: `rotate(${arahRotation[arah] ?? 0}deg)` }}
+        aria-hidden
+      />
+      <span className="uppercase">{arah}</span>
+    </span>
   )
 }

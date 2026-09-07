@@ -30,13 +30,20 @@ async function tab(name) {
   return csvToRecords(body)
 }
 
-const [config, lokasi, kamar] = await Promise.all([
+const [config, lokasi, kamar, denah] = await Promise.all([
   tab('config'),
   tab('lokasi'),
   tab('kamar'),
+  // Optional tab: an owner may never make it. Its absence is not an error.
+  tab('denah').catch(() => []),
 ])
 const target = fileURLToPath(
   new URL('../src/data/snapshot.json', import.meta.url),
 )
-writeFileSync(target, JSON.stringify({ config, lokasi, kamar }, null, 2) + '\n')
-console.log(`snapshot written: ${lokasi.length} lokasi, ${kamar.length} kamar`)
+writeFileSync(
+  target,
+  JSON.stringify({ config, lokasi, kamar, denah }, null, 2) + '\n',
+)
+console.log(
+  `snapshot written: ${lokasi.length} lokasi, ${kamar.length} kamar, ${denah.length} baris denah`,
+)

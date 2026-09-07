@@ -49,6 +49,17 @@ const tipe = z
   .default('Standard')
   .transform((value) => value.trim() || 'Standard')
 
+/** Which way the top of a floor drawing points. Anything the owner mistypes
+ *  collapses to '' (no compass) rather than dropping the row. */
+export const arahValues = ['utara', 'selatan', 'timur', 'barat'] as const
+export type Arah = (typeof arahValues)[number]
+
+const arah = z
+  .string()
+  .default('')
+  .transform((value) => value.trim().toLowerCase())
+  .pipe(z.enum([...arahValues, '']).catch(''))
+
 export const configRowSchema = z.object({
   key: z.string().min(1),
   value: z.string().default(''),
@@ -91,8 +102,22 @@ export const kamarSchema = z.object({
   aktif: boolish,
 })
 
+/** One row of a floor drawing: the cells of `sel`, left to right. Optional tab,
+ *  optional per floor; a floor with no row here renders as the plain listing. */
+export const denahRowSchema = z.object({
+  lokasi_slug: z
+    .string()
+    .min(1)
+    .transform((value) => value.trim().toLowerCase()),
+  lantai: numeric(1),
+  baris: numeric(1),
+  sel: csvList,
+  arah,
+})
+
 export type Lokasi = z.infer<typeof lokasiSchema>
 export type Kamar = z.infer<typeof kamarSchema>
+export type DenahRow = z.infer<typeof denahRowSchema>
 
 export type SiteConfig = {
   brand: string
@@ -105,6 +130,10 @@ export type Catalog = {
   config: SiteConfig
   lokasi: Array<Lokasi>
   kamar: Array<Kamar>
+  /** Optional floor drawings. Absent on a last-good copy saved before the tab
+   *  existed; empty when the Sheet has no `denah` tab or it is unreadable. Read
+   *  it as `catalog.denah ?? []`. */
+  denah?: Array<DenahRow>
   /** Where the render came from, surfaced on /purge so the client can tell
    *  "my edit is live" (`sheet`) from "the Sheet is unreachable and this is the
    *  last copy we read" (`cache`) or "no SHEET_ID, this is sample data" (`seed`). */

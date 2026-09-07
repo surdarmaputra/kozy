@@ -103,7 +103,8 @@ export async function recall(): Promise<Catalog | null> {
   for (const backend of backends) {
     const hit = await backend.load()
     if (hit && Array.isArray(hit.lokasi) && hit.lokasi.length > 0) {
-      return { ...hit, source: 'cache' }
+      // A copy saved before the `denah` tab existed has no such key.
+      return { ...hit, denah: hit.denah ?? [], source: 'cache' }
     }
   }
   return null

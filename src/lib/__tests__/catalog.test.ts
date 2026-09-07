@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { csvToRecords, parseCsv } from '../csv'
-import { kamarSchema, lokasiSchema, parseRows } from '../schema'
+import { denahRowSchema, kamarSchema, lokasiSchema, parseRows } from '../schema'
 import {
   activeLokasi,
+  floorPlansFor,
   groupByFloor,
   roomTypesFor,
   roomsFor,
@@ -166,6 +167,26 @@ function catalogFixture(): Catalog {
       'kamar',
       skipped,
     ),
+    denah: parseRows(
+      denahRowSchema,
+      [
+        {
+          lokasi_slug: 'seturan',
+          lantai: '1',
+          baris: '2',
+          sel: 's11, lorong, WC',
+          arah: 'utara',
+        },
+        {
+          lokasi_slug: 'seturan',
+          lantai: '1',
+          baris: '1',
+          sel: 'pintu, ., .',
+        },
+      ],
+      'denah',
+      skipped,
+    ),
     source: 'seed',
     fetchedAt: '',
     skipped,
@@ -185,6 +206,95 @@ describe('selectors', () => {
     const floors = groupByFloor(roomsFor(catalogFixture(), 'seturan'))
     expect(floors.map((floor) => floor.lantai)).toEqual([1, 2])
     expect(floors[0].rooms.map((room) => room.kode)).toEqual(['S11', 'S12'])
+  })
+})
+
+describe('denahRowSchema', () => {
+  it('coerces the shapes a human types and splits sel into ordered tokens', () => {
+    const row = denahRowSchema.parse({
+      lokasi_slug: ' Batam-Centre ',
+      lantai: ' 2 ',
+      baris: '1',
+      sel: 'A1, A2 , lorong, . ',
+      arah: ' Utara ',
+    })
+    expect(row.lokasi_slug).toBe('batam-centre')
+    expect(row.lantai).toBe(2)
+    expect(row.sel).toEqual(['A1', 'A2', 'lorong', '.'])
+    expect(row.arah).toBe('utara')
+  })
+
+  it('keeps a quoted sel cell that contains a comma intact', () => {
+    const [record] = csvToRecords(
+      'lokasi_slug,lantai,baris,sel\nx,1,1,"A1, A2, Ruang, Tunggu"',
+    )
+    expect(denahRowSchema.parse(record).sel).toEqual([
+      'A1',
+      'A2',
+      'Ruang',
+      'Tunggu',
+    ])
+  })
+
+  it('drops an unrecognised arah to empty rather than failing the row', () => {
+    expect(
+      denahRowSchema.parse({ lokasi_slug: 'x', sel: 'A1', arah: 'atas' }).arah,
+    ).toBe('')
+  })
+
+  it('skips a denah row with no lokasi_slug and keeps its neighbours', () => {
+    const skipped: Array<string> = []
+    const rows = parseRows(
+      denahRowSchema,
+      [
+        { lokasi_slug: 'x', lantai: '1', baris: '1', sel: 'A1' },
+        { lokasi_slug: '', lantai: '1', baris: '2', sel: 'A2' },
+      ],
+      'denah',
+      skipped,
+    )
+    expect(rows).toHaveLength(1)
+    expect(skipped[0]).toContain('denah row 3')
+  })
+})
+
+describe('floorPlansFor', () => {
+  it('builds one drawing per drawn floor, rows in baris order, with its arah', () => {
+    const plans = floorPlansFor(catalogFixture(), 'seturan')
+    expect(plans.map((plan) => plan.lantai)).toEqual([1])
+    expect(plans[0].arah).toBe('utara')
+    expect(plans[0].rows).toHaveLength(2)
+    expect(plans[0].rows[0].map((cell) => cell.kind)).toEqual([
+      'marker',
+      'gap',
+      'gap',
+    ])
+  })
+
+  it('resolves a room token case-insensitively and passes other tokens through as spots', () => {
+    const [floor] = floorPlansFor(catalogFixture(), 'seturan')
+    const second = floor.rows[1]
+    expect(second[0]).toMatchObject({ kind: 'room' })
+    expect(second[0]).toHaveProperty('room.kode', 'S11')
+    expect(second[1]).toEqual({ kind: 'marker', marker: 'lorong' })
+    expect(second[2]).toEqual({ kind: 'spot', label: 'WC' })
+  })
+
+  it('lists an active room the drawing left out under unmapped, never hiding it', () => {
+    const [floor] = floorPlansFor(catalogFixture(), 'seturan')
+    expect(floor.unmapped.map((room) => room.kode)).toEqual(['S12'])
+  })
+
+  it('returns nothing when the location has no denah rows', () => {
+    expect(
+      floorPlansFor({ ...catalogFixture(), denah: [] }, 'seturan'),
+    ).toEqual([])
+  })
+
+  it('does not throw when denah is absent on a recalled old copy', () => {
+    const catalog = catalogFixture()
+    delete (catalog as { denah?: unknown }).denah
+    expect(floorPlansFor(catalog, 'seturan')).toEqual([])
   })
 })
 

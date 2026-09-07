@@ -11,7 +11,13 @@ import { Button } from '#/components/ui/button'
 import { loadCatalog } from '#/lib/catalog'
 import { formatRupiah } from '#/lib/format'
 import { noStoreHeaders, sheetCacheHeaders } from '#/lib/http'
-import { activeLokasi, findLokasi, roomTypesFor, roomsFor } from '#/lib/select'
+import {
+  activeLokasi,
+  findLokasi,
+  floorPlansFor,
+  roomTypesFor,
+  roomsFor,
+} from '#/lib/select'
 
 export const Route = createFileRoute('/locations/$slug/')({
   loader: () => loadCatalog(),
@@ -78,6 +84,7 @@ function LokasiDetail() {
 
   const rooms = roomsFor(catalog, lokasi.slug)
   const types = roomTypesFor(catalog, lokasi.slug)
+  const plans = floorPlansFor(catalog, lokasi.slug)
   const available = rooms.filter((room) => room.status === 'kosong')
   const prices = (available.length > 0 ? available : rooms)
     .map((room) => room.harga_bulanan)
@@ -205,6 +212,7 @@ function LokasiDetail() {
           <RoomPicker
             types={types}
             rooms={rooms}
+            plans={plans}
             lokasi={lokasi}
             fallbackNumber={catalog.config.wa_default}
           />

@@ -162,6 +162,38 @@ for value, bg, fg in (
         ),
     )
 
+# ---------------------------------------------------------------- denah
+ws = wb.create_sheet('denah')
+dnh_headers = ['lokasi_slug', 'lantai', 'baris', 'sel', 'arah']
+header_row(
+    ws,
+    dnh_headers,
+    {
+        'lokasi_slug': 'Pilih dari dropdown. Harus sama persis dengan slug di tab lokasi.',
+        'lantai': 'Angka lantai, sama dengan kolom lantai di tab kamar.',
+        'baris': 'Urutan baris di denah, dari depan ke belakang. 1, 2, 3, ...',
+        'sel': 'Isi kotak dari kiri ke kanan, dipisah koma. Boleh kode kamar (A1), '
+        'kata kunci pintu / tangga / lift / lorong, tanda titik (.) untuk kotak '
+        'kosong, atau tulisan bebas seperti WC atau Dapur.',
+        'arah': 'Boleh dikosongkan. Isi di salah satu baris lantai: utara, selatan, '
+        'timur, atau barat, yaitu arah yang menghadap ke atas denah.',
+    },
+    [16, 9, 9, 64, 12],
+)
+body(ws, DATA.get('denah', []), dnh_headers, wrap_cols={'sel'})
+
+dnh_slug_dv = DataValidation(
+    type='list', formula1='lokasi!$A$2:$A$50', allow_blank=False
+)
+ws.add_data_validation(dnh_slug_dv)
+dnh_slug_dv.add('A2:A400')
+
+arah_dv = DataValidation(
+    type='list', formula1='"utara,selatan,timur,barat"', allow_blank=True
+)
+ws.add_data_validation(arah_dv)
+arah_dv.add('E2:E400')
+
 # ---------------------------------------------------------------- panduan
 ws = wb.create_sheet('Panduan', 0)
 ws.sheet_view.showGridLines = False
@@ -202,13 +234,26 @@ put(
 ws.merge_cells('B3:C3')
 
 r = 5
-r = section(r, 'Tiga tab yang dibaca website')
+r = section(r, 'Tab yang dibaca website')
 for name, text in (
     ('config', 'Nama properti, kalimat perkenalan, nomor WhatsApp utama, dan alamat kantor.'),
     ('lokasi', 'Satu baris untuk satu bangunan kos.'),
     ('kamar', 'Satu baris untuk satu kamar fisik. Baris inilah yang jadi kotak di denah kamar.'),
+    ('denah', 'Opsional. Menggambar tata letak tiap lantai. Kalau dikosongkan, denah kamar tetap tampil sebagai daftar kotak per lantai.'),
 ):
     r = step(r, name, text)
+r += 1
+
+r = section(r, 'Menggambar denah lantai (opsional)')
+for label, text in (
+    ('Satu baris = satu baris denah', 'Di tab denah, isi lokasi_slug, lantai, dan baris (1, 2, 3 dari depan ke belakang).'),
+    ('Kolom sel', 'Tulis isi kotak dari kiri ke kanan, dipisah koma. Contoh: A1, A2, lorong, A3, tangga.'),
+    ('Kata kunci', 'pintu, tangga, lift, lorong tampil dengan ikon. Titik (.) berarti kotak kosong.'),
+    ('Tulisan bebas', 'Kata lain seperti WC atau Dapur tampil apa adanya sebagai penanda.'),
+    ('arah', 'Boleh dikosongkan. Isi utara / selatan / timur / barat di salah satu baris lantai untuk menampilkan kompas.'),
+    ('Salah ketik aman', 'Kode kamar yang tidak dikenali tidak hilang, kamarnya muncul di bagian Belum dipetakan.'),
+):
+    r = step(r, label, text)
 r += 1
 
 r = section(r, 'Mengubah status kamar')
@@ -244,7 +289,7 @@ r = section(r, 'Yang tidak boleh dilakukan')
 for label, text in (
     ('Jangan hapus baris', 'Untuk menyembunyikan lokasi atau kamar, ubah kolom aktif menjadi FALSE.'),
     ('Jangan ubah baris 1', 'Nama kolom di baris pertama dipakai website untuk mengenali datanya.'),
-    ('Jangan ubah nama tab', 'Tiga tab harus tetap bernama config, lokasi, dan kamar, huruf kecil.'),
+    ('Jangan ubah nama tab', 'config, lokasi, dan kamar harus tetap bernama persis itu, huruf kecil. Tab denah opsional, tetapi kalau dipakai namanya juga harus denah.'),
     ('Jangan cabut sharing', 'File harus tetap Anyone with the link, Viewer. Kalau dicabut, website memakai data cadangan.'),
 ):
     r = step(r, label, text)

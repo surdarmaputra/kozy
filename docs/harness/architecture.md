@@ -18,8 +18,8 @@ Components may import `select.ts`, never `sheet.ts`, `store.ts`, or
 
 ## #sheet-contract
 
-Three tabs, read as CSV via gviz. No GCP project, no API key; the Sheet is
-shared "Anyone with the link, Viewer".
+Three required tabs plus one optional (`denah`), read as CSV via gviz. No GCP
+project, no API key; the Sheet is shared "Anyone with the link, Viewer".
 
 ```
 config: key, value
@@ -27,11 +27,13 @@ lokasi: slug, nama, alamat, gmaps_url, lat, lng, deskripsi, fasilitas,
         nomor_wa, foto_urls, aktif
 kamar:  kode, lokasi_slug, lantai, luas_m2, tipe, harga_bulanan, status,
         fasilitas, foto_urls, catatan, aktif
+denah:  lokasi_slug, lantai, baris, sel, arah          (optional tab)
 ```
 
-Frozen, in Indonesian, because the owner's spreadsheet and `docs/` describe
-them. `status` is `kosong | dibooking | terisi`. `tipe` is free text on
-purpose: it is how the owner names room types without a deploy.
+The three required tabs are frozen, in Indonesian, because the owner's
+spreadsheet and `docs/` describe them. `status` is `kosong | dibooking |
+terisi`. `tipe` is free text on purpose: it is how the owner names room types
+without a deploy.
 
 Column semantics that are easy to get wrong:
 
@@ -40,6 +42,18 @@ Column semantics that are easy to get wrong:
 - `fasilitas` and `foto_urls` are comma-separated, split at parse time.
 - Rooms sharing a `tipe` are one product. Their facilities are intersected,
   never unioned, so a type card cannot oversell.
+
+`denah` is additive and **fetched tolerantly**: `fetchTab('denah').catch(() =>
+[])` inside `readCatalog`'s `Promise.all`, so a missing tab, revoked share, or
+non-CSV response on it alone yields no drawing rather than failing the whole
+read. Each row is one visual row of a floor; `sel` is comma-separated cell
+tokens (a room `kode`, one of `pintu|tangga|lift|lorong`, `.` for a gap, or free
+text shown as a labelled spot). `floorPlansFor` (`src/lib/select.ts`) turns the
+rows into one drawing per floor; a floor with no rows is absent from the result
+and `RoomMap` renders it as the plain per-floor listing. An active room no cell
+references is returned in `unmapped` so a typo cannot hide it. A last-good copy
+saved before this tab existed has no `denah` key — read it as `catalog.denah ??
+[]` (`store.ts` `recall` also backfills `[]`).
 
 ## #resilience
 

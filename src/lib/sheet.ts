@@ -1,5 +1,11 @@
 import { csvToRecords } from './csv'
-import { configRowSchema, kamarSchema, lokasiSchema, parseRows } from './schema'
+import {
+  configRowSchema,
+  denahRowSchema,
+  kamarSchema,
+  lokasiSchema,
+  parseRows,
+} from './schema'
 import type { Catalog, SiteConfig } from './schema'
 import { persist, recall } from './store'
 
@@ -65,11 +71,13 @@ async function seedCatalog(skipped: Array<string>): Promise<Catalog> {
     config: Array<Record<string, string>>
     lokasi: Array<Record<string, string>>
     kamar: Array<Record<string, string>>
+    denah?: Array<Record<string, string>>
   }
   return {
     config: toConfig(raw.config, skipped),
     lokasi: parseRows(lokasiSchema, raw.lokasi, 'lokasi', skipped),
     kamar: parseRows(kamarSchema, raw.kamar, 'kamar', skipped),
+    denah: parseRows(denahRowSchema, raw.denah ?? [], 'denah', skipped),
     source: 'seed',
     fetchedAt: new Date().toISOString(),
     skipped,
@@ -83,15 +91,20 @@ async function readCatalog(): Promise<Catalog> {
 
   if (!sheetId()) return seedCatalog(skipped)
 
-  const [config, lokasi, kamar] = await Promise.all([
+  // `denah` is optional: an owner who never makes the tab, or a revoked share on
+  // it alone, must not fail the whole read. Its failure means "no drawing", and
+  // the map falls back to the plain per-floor listing.
+  const [config, lokasi, kamar, denah] = await Promise.all([
     fetchTab('config'),
     fetchTab('lokasi'),
     fetchTab('kamar'),
+    fetchTab('denah').catch(() => [] as Array<Record<string, string>>),
   ])
   const catalog: Catalog = {
     config: toConfig(config, skipped),
     lokasi: parseRows(lokasiSchema, lokasi, 'lokasi', skipped),
     kamar: parseRows(kamarSchema, kamar, 'kamar', skipped),
+    denah: parseRows(denahRowSchema, denah, 'denah', skipped),
     source: 'sheet',
     fetchedAt: new Date().toISOString(),
     skipped,

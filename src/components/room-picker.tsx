@@ -12,7 +12,7 @@ import { formatRupiah } from '#/lib/format'
 import { cn } from '#/lib/utils'
 import { waLinkForType } from '#/lib/wa'
 import type { Kamar, Lokasi } from '#/lib/schema'
-import type { RoomType } from '#/lib/select'
+import type { FloorPlan, RoomType } from '#/lib/select'
 
 const FACILITY_LIMIT = 6
 
@@ -28,11 +28,13 @@ const FACILITY_LIMIT = 6
 export function RoomPicker({
   types,
   rooms,
+  plans,
   lokasi,
   fallbackNumber,
 }: {
   types: Array<RoomType>
   rooms: Array<Kamar>
+  plans: Array<FloorPlan>
   lokasi: Lokasi
   fallbackNumber: string
 }) {
@@ -105,6 +107,7 @@ export function RoomPicker({
           ) : null}
           <RoomMap
             rooms={rooms}
+            plans={plans}
             highlight={active?.slug}
             highlightLabel={active?.nama}
             onSelectRoom={setDetailRoom}

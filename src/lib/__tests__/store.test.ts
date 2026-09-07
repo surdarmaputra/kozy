@@ -16,6 +16,7 @@ function fixture(overrides: Partial<Catalog> = {}): Catalog {
       [],
     ),
     kamar: [],
+    denah: [],
     source: 'sheet',
     fetchedAt: '2026-01-01T00:00:00.000Z',
     skipped: [],
@@ -67,6 +68,13 @@ describe('store', () => {
     const hit = await recall()
     expect(hit?.source).toBe('cache')
     expect(hit?.kamar).toEqual([])
+  })
+
+  it('recall defaults denah to [] for a copy saved before the tab existed', async () => {
+    const { denah: _drop, ...preDenah } = fixture()
+    writeFileSync(join(dir, 'catalog.json'), JSON.stringify(preDenah))
+    const hit = await recall()
+    expect(hit?.denah).toEqual([])
   })
 
   it('persist writes a cache file a cold instance can recover from', async () => {

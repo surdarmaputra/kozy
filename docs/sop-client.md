@@ -55,6 +55,26 @@ Datanya tetap tersimpan dan bisa ditampilkan lagi kapan saja.
 2. Salin tautannya ke kolom `foto_urls`. Beberapa foto dipisah koma.
 3. Buka bookmark **Perbarui website**.
 
+## 7. Menggambar denah lantai (opsional)
+
+Kalau ingin denah kamar terlihat seperti tata letak asli, bukan sekadar daftar
+kotak, isi tab `denah`. Boleh dikosongkan, boleh digambar sebagian saja.
+
+1. Tab `denah`. Satu baris untuk satu baris kotak di denah, dari depan ke
+   belakang. Isi `lokasi_slug`, `lantai`, dan `baris` (`1`, `2`, `3`).
+2. Kolom `sel`: tulis isi kotak dari kiri ke kanan, dipisah koma. Contoh:
+   `A1, A2, lorong, A3, tangga`.
+   - Kode kamar harus sama dengan kolom `kode` di tab `kamar`.
+   - Kata `pintu`, `tangga`, `lift`, `lorong` tampil dengan ikon.
+   - Titik (`.`) berarti kotak kosong.
+   - Tulisan lain seperti `WC` atau `Dapur` tampil apa adanya.
+3. Kolom `arah` boleh dikosongkan. Isi `utara`, `selatan`, `timur`, atau `barat`
+   di salah satu baris lantai untuk menampilkan kompas.
+4. Buka bookmark **Perbarui website**.
+
+Kalau ada kode kamar yang salah ketik, kamarnya tidak hilang. Kamar yang belum
+diletakkan muncul di bagian **Belum dipetakan** di bawah denah lantai itu.
+
 ## Kalau ada yang aneh
 
 Buka bookmark **Perbarui website**. Halaman itu menyebutkan:

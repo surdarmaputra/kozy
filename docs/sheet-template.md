@@ -1,6 +1,7 @@
 # Struktur Google Sheet
 
-Satu spreadsheet, tiga tab. Nama tab harus persis seperti di bawah (huruf kecil).
+Satu spreadsheet, tiga tab wajib (`config`, `lokasi`, `kamar`) dan satu tab
+opsional (`denah`). Nama tab harus persis seperti di bawah (huruf kecil).
 Baris pertama tiap tab adalah header dan tidak boleh diubah namanya.
 
 Template siap pakai ada di [`docs/kozy-sheet-template.xlsx`](kozy-sheet-template.xlsx).
@@ -64,6 +65,38 @@ lokasi. Karena itu:
   kamar bertipe itu. Kalau satu kamar tidak punya AC, AC tidak akan muncul di
   kartu tipe. Ini disengaja supaya tidak menjanjikan yang tidak ada.
 
+## Tab `denah` (opsional)
+
+Menggambar tata letak tiap lantai supaya calon penyewa bisa membayangkan posisi
+kamar: baris, lorong, pintu, tangga, lift, dan arah mata angin. **Boleh
+dikosongkan atau tidak dibuat sama sekali.** Tanpa tab ini, denah kamar tetap
+tampil seperti biasa, yaitu daftar kotak kamar per lantai. Bisa juga digambar
+sebagian, misalnya hanya lantai 1, sisanya otomatis memakai daftar biasa.
+
+Satu baris di tab ini sama dengan satu baris kotak di denah, dari depan ke
+belakang.
+
+| Kolom         | Isi                                                                                           | Contoh                       |
+| ------------- | --------------------------------------------------------------------------------------------- | ---------------------------- |
+| `lokasi_slug` | Harus sama persis dengan `slug` di tab `lokasi`                                               | `batam-centre`               |
+| `lantai`      | Angka, sama dengan `lantai` di tab `kamar`                                                    | `1`                          |
+| `baris`       | Urutan baris denah. `1` paling depan, lalu `2`, `3`, dan seterusnya                           | `2`                          |
+| `sel`         | Isi kotak dari kiri ke kanan, dipisah koma                                                    | `A1, A2, lorong, A3, tangga` |
+| `arah`        | **Boleh kosong.** Diisi di salah satu baris lantai saja: `utara`, `selatan`, `timur`, `barat` | `utara`                      |
+
+Isi yang dikenali di kolom `sel`:
+
+- **Kode kamar** seperti `A1`. Harus cocok dengan `kode` di tab `kamar` untuk
+  lokasi dan lantai yang sama. Huruf besar atau kecil sama saja.
+- **`pintu`, `tangga`, `lift`, `lorong`** tampil dengan ikon.
+- **Titik (`.`)** berarti kotak kosong, dipakai untuk merapikan posisi.
+- **Tulisan lain** seperti `WC`, `Dapur`, `Mushola` tampil apa adanya sebagai
+  penanda. Tidak perlu minta developer menambah kata baru.
+
+Aman kalau salah ketik: kode kamar yang tidak dikenali tidak membuat kamarnya
+hilang. Kamar yang belum diletakkan di denah muncul di bagian **Belum
+dipetakan** di bawah denah lantainya.
+
 ## Data validation yang wajib dipasang
 
 Dipasang sekali oleh developer, mencegah salah ketik dari HP.
@@ -73,7 +106,9 @@ Dipasang sekali oleh developer, mencegah salah ketik dari HP.
 3. `kamar!E:E` (`tipe`): Dropdown berisi daftar nama tipe yang dipakai. Tambah
    item baru di sini setiap kali ada tipe baru.
 4. `lokasi!K:K` dan `kamar!K:K` (`aktif`): Dropdown > `TRUE`, `FALSE`.
-5. Baris 1 di ketiga tab: klik kanan > Protect range, hanya pemilik yang boleh mengubah.
+5. Baris 1 di setiap tab: klik kanan > Protect range, hanya pemilik yang boleh mengubah.
+6. Kalau tab `denah` dipakai: `denah!A:A` (`lokasi_slug`) dropdown dari `lokasi!A2:A`,
+   dan `denah!E:E` (`arah`) dropdown `utara`, `selatan`, `timur`, `barat`.
 
 ## Sharing
 
