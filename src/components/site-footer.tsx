@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import { Logo } from '#/components/logo'
 import type { LokasiSummary } from '#/lib/select'
 import type { SiteConfig } from '#/lib/schema'
 
@@ -13,7 +14,10 @@ export function SiteFooter({
     <footer className="border-t border-border bg-background">
       <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.4fr_1fr]">
         <div>
-          <p className="text-lg font-bold tracking-tight">{config.brand}</p>
+          <p className="flex items-center gap-2 text-lg font-bold tracking-tight">
+            <Logo label={config.brand} className="size-7" />
+            {config.brand}
+          </p>
           {config.alamat_kantor ? (
             <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">
               {config.alamat_kantor}
@@ -31,8 +35,8 @@ export function SiteFooter({
           ) : null}
         </div>
 
-        <nav aria-label="Locations">
-          <p className="text-sm font-semibold">Locations</p>
+        <nav aria-label="Lokasi">
+          <p className="text-sm font-semibold">Lokasi</p>
           <ul className="mt-3 space-y-2">
             {lokasi.map((item) => (
               <li key={item.slug}>
@@ -49,10 +53,10 @@ export function SiteFooter({
         </nav>
       </div>
 
-      <div className="border-t border-border/70">
-        <p className="mx-auto w-full max-w-6xl px-4 py-5 text-xs text-muted-foreground sm:px-6">
-          © {new Date().getFullYear()} {config.brand}. Prices and availability
-          can change, please confirm on WhatsApp before visiting.
+      <div>
+        <p className="mx-auto w-full max-w-6xl px-4 pb-8 text-xs text-muted-foreground sm:px-6">
+          © {new Date().getFullYear()} {config.brand}. Harga dan ketersediaan
+          bisa berubah, konfirmasi dulu lewat WhatsApp sebelum berkunjung.
         </p>
       </div>
     </footer>

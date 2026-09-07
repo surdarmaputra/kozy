@@ -1,4 +1,6 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
+import { ArrowRight } from 'lucide-react'
+import { CatalogUnavailable } from '#/components/catalog-unavailable'
 import { ContactSection } from '#/components/contact-section'
 import { LocationCard } from '#/components/location-card'
 import { Photo } from '#/components/photo'
@@ -7,20 +9,21 @@ import { SiteHeader } from '#/components/site-header'
 import { Button } from '#/components/ui/button'
 import { loadCatalog } from '#/lib/catalog'
 import { formatRupiah } from '#/lib/format'
-import { sheetCacheHeaders } from '#/lib/http'
+import { noStoreHeaders, sheetCacheHeaders } from '#/lib/http'
 import { activeLokasi } from '#/lib/select'
 
 export const Route = createFileRoute('/')({
   loader: () => loadCatalog(),
-  headers: () => sheetCacheHeaders,
+  headers: ({ loaderData }) =>
+    loaderData == null ? noStoreHeaders : sheetCacheHeaders,
   head: ({ loaderData }) => {
     const brand = loaderData?.config.brand ?? 'Kozy'
     const description =
       loaderData?.config.tagline ??
-      'Every room and its current availability, updated straight from a Google Sheet.'
+      'Setiap kamar dan status ketersediaannya, diperbarui langsung dari Google Sheet.'
     return {
       meta: [
-        { title: `${brand} | Room catalogue` },
+        { title: `${brand} | Katalog kamar kos` },
         { name: 'description', content: description },
         { property: 'og:type', content: 'website' },
         { property: 'og:title', content: brand },
@@ -34,6 +37,8 @@ export const Route = createFileRoute('/')({
 
 function Home() {
   const catalog = Route.useLoaderData()
+  if (!catalog) return <CatalogUnavailable />
+
   const lokasi = activeLokasi(catalog)
   const single = lokasi.length === 1
 
@@ -52,31 +57,43 @@ function Home() {
       <main id="konten" className="flex-1">
         <section className="mx-auto grid w-full max-w-6xl gap-10 px-4 pt-10 pb-14 sm:px-6 sm:pt-16 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:gap-14 lg:pt-24">
           <div>
-            <h1 className="text-4xl leading-[1.05] font-extrabold tracking-tight text-balance sm:text-5xl lg:text-6xl">
+            <h1 className="reveal text-4xl leading-[1.05] font-extrabold tracking-tight text-balance sm:text-5xl lg:text-6xl">
               {catalog.config.brand}
             </h1>
-            <p className="mt-5 max-w-lg text-base leading-relaxed text-muted-foreground sm:text-lg">
+            <p className="reveal mt-5 max-w-lg text-base leading-relaxed text-muted-foreground [animation-delay:80ms] sm:text-lg">
               {catalog.config.tagline}
             </p>
-            <div className="mt-8">
+            <div className="reveal mt-8 [animation-delay:160ms]">
               {single && lokasi[0] ? (
-                <Button asChild size="lg" className="h-12 px-7 text-base">
+                <Button
+                  asChild
+                  size="lg"
+                  className="group h-12 gap-2 px-7 text-base transition-transform active:scale-[0.98]"
+                >
                   <Link to="/locations/$slug" params={{ slug: lokasi[0].slug }}>
-                    View rooms
+                    Lihat kamar
+                    <ArrowRight className="cta-arrow size-5" aria-hidden />
                   </Link>
                 </Button>
               ) : (
-                <Button asChild size="lg" className="h-12 px-7 text-base">
-                  <a href="#locations">See locations</a>
+                <Button
+                  asChild
+                  size="lg"
+                  className="group h-12 gap-2 px-7 text-base transition-transform active:scale-[0.98]"
+                >
+                  <a href="#locations">
+                    Lihat lokasi
+                    <ArrowRight className="cta-arrow size-5" aria-hidden />
+                  </a>
                 </Button>
               )}
             </div>
           </div>
 
-          <div className="overflow-hidden rounded-xl border border-border">
+          <div className="reveal overflow-hidden rounded-xl [animation-delay:120ms]">
             <Photo
               src={heroPhoto}
-              alt={`${lokasi[0]?.nama ?? catalog.config.brand} building`}
+              alt={`Bangunan ${lokasi[0]?.nama ?? catalog.config.brand}`}
               width={1400}
               priority
               className="aspect-[4/3] w-full lg:aspect-[5/4]"
@@ -84,14 +101,11 @@ function Home() {
           </div>
         </section>
 
-        <section
-          aria-label="Availability summary"
-          className="border-y border-border bg-card"
-        >
-          <dl className="mx-auto grid w-full max-w-6xl grid-cols-3 divide-x divide-border px-4 sm:px-6">
-            <Stat label="Locations" value={String(lokasi.length)} />
-            <Stat label="Rooms available" value={String(totalKosong)} accent />
-            <Stat label="From" value={formatRupiah(hargaTerendah)} />
+        <section aria-label="Ringkasan ketersediaan" className="bg-card">
+          <dl className="mx-auto grid w-full max-w-6xl grid-cols-3 divide-x divide-border/60 px-4 sm:px-6">
+            <Stat label="Lokasi" value={String(lokasi.length)} />
+            <Stat label="Kamar tersedia" value={String(totalKosong)} accent />
+            <Stat label="Mulai" value={formatRupiah(hargaTerendah)} />
           </dl>
         </section>
 
@@ -100,20 +114,24 @@ function Home() {
           className="mx-auto w-full max-w-6xl scroll-mt-20 px-4 py-16 sm:px-6 sm:py-20"
         >
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            {single ? 'Location' : 'Choose a location'}
+            {single ? 'Lokasi' : 'Pilih lokasi'}
           </h2>
           <p className="mt-3 max-w-xl leading-relaxed text-muted-foreground">
-            The WhatsApp number can differ per location. Every chat button on
-            the site already points at the right one.
+            Nomor WhatsApp bisa berbeda tiap lokasi. Semua tombol chat di situs
+            ini sudah mengarah ke nomor yang tepat.
           </p>
 
           {lokasi.length === 0 ? (
             <p className="mt-10 rounded-xl border border-dashed border-border bg-card px-6 py-12 text-center text-sm text-muted-foreground">
-              No location data yet. Please try again in a moment.
+              Belum ada data lokasi. Silakan coba lagi sebentar.
             </p>
           ) : (
             <div
-              className={single ? 'mt-10' : 'mt-10 grid gap-5 md:grid-cols-2'}
+              className={
+                single
+                  ? 'reveal mt-10'
+                  : 'reveal mt-10 grid gap-5 md:grid-cols-2'
+              }
             >
               {lokasi.map((item) => (
                 <LocationCard key={item.slug} lokasi={item} wide={single} />
@@ -124,7 +142,7 @@ function Home() {
 
         <section className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6 sm:pb-20">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            How it works
+            Cara kerjanya
           </h2>
           <ol className="mt-10 max-w-2xl">
             {steps.map((step) => (
@@ -150,16 +168,16 @@ function Home() {
 
 const steps = [
   {
-    title: 'Open a location page',
-    body: 'The address, shared facilities, the map, and the room map all sit on one page.',
+    title: 'Buka halaman lokasi',
+    body: 'Alamat, fasilitas bersama, peta, dan denah kamar semua ada di satu halaman.',
   },
   {
-    title: 'Read the room map',
-    body: 'Each room is coloured by state: available, reserved, or occupied.',
+    title: 'Baca denah kamar',
+    body: 'Tiap kamar diberi warna sesuai status: tersedia, dibooking, atau terisi.',
   },
   {
-    title: 'Tap an available room',
-    body: 'WhatsApp opens with the room code, its type, and its price already written in the message.',
+    title: 'Ketuk kamar untuk lihat detail',
+    body: 'Harga, luas, dan catatan kamar muncul di satu kotak, lengkap dengan tombol WhatsApp yang kode kamarnya sudah tertulis.',
   },
 ]
 

@@ -21,8 +21,8 @@ export function LocationCard({
       to="/locations/$slug"
       params={{ slug: lokasi.slug }}
       className={cn(
-        'group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card',
-        'transition-[transform,border-color] duration-200 hover:border-primary/45 active:scale-[0.99]',
+        'card-soft card-soft-hover group relative flex flex-col overflow-hidden rounded-xl bg-card',
+        'transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 active:scale-[0.99]',
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
         wide && 'md:flex-row',
       )}
@@ -68,16 +68,16 @@ export function LocationCard({
 
         <dl className="flex flex-wrap items-end gap-x-8 gap-y-3">
           <div>
-            <dt className="text-xs text-muted-foreground">From</dt>
+            <dt className="text-xs text-muted-foreground">Mulai</dt>
             <dd className="num mt-0.5 text-lg font-bold">
               {formatRupiah(lokasi.hargaMulai)}
               <span className="ml-1 text-xs font-medium text-muted-foreground">
-                /month
+                /bulan
               </span>
             </dd>
           </div>
           <div>
-            <dt className="text-xs text-muted-foreground">Available</dt>
+            <dt className="text-xs text-muted-foreground">Tersedia</dt>
             <dd
               className={cn(
                 'num mt-0.5 text-lg font-bold',
@@ -86,14 +86,14 @@ export function LocationCard({
             >
               {lokasi.kamarKosong}
               <span className="ml-1 text-xs font-medium text-muted-foreground">
-                of {lokasi.kamarTotal}
+                dari {lokasi.kamarTotal}
               </span>
             </dd>
           </div>
         </dl>
 
         <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary">
-          View rooms
+          Lihat kamar
           <span
             aria-hidden
             className="transition-transform group-hover:translate-x-0.5"

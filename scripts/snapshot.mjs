@@ -1,11 +1,13 @@
 /**
- * Refreshes src/data/snapshot.json from the live Sheet.
+ * Refreshes the dev seed src/data/snapshot.json from the live Sheet.
  *
  *   SHEET_ID=... node scripts/snapshot.mjs
  *
- * The snapshot is the last line of defence: if the Sheet is deleted, renamed,
- * or un-shared, the site keeps rendering this file. Commit it after any
- * structural change to the Sheet.
+ * This file is a development seed, not a runtime fallback: the app renders it
+ * only when SHEET_ID is unset (local dev, the CI build). A failed fetch in
+ * production serves the last copy read successfully instead (see src/lib/store.ts).
+ * make-sheet-template.py also builds the client .xlsx from it, so commit it
+ * after any structural change to the Sheet.
  */
 import { writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -28,13 +30,20 @@ async function tab(name) {
   return csvToRecords(body)
 }
 
-const [config, lokasi, kamar] = await Promise.all([
+const [config, lokasi, kamar, denah] = await Promise.all([
   tab('config'),
   tab('lokasi'),
   tab('kamar'),
+  // Optional tab: an owner may never make it. Its absence is not an error.
+  tab('denah').catch(() => []),
 ])
 const target = fileURLToPath(
   new URL('../src/data/snapshot.json', import.meta.url),
 )
-writeFileSync(target, JSON.stringify({ config, lokasi, kamar }, null, 2) + '\n')
-console.log(`snapshot written: ${lokasi.length} lokasi, ${kamar.length} kamar`)
+writeFileSync(
+  target,
+  JSON.stringify({ config, lokasi, kamar, denah }, null, 2) + '\n',
+)
+console.log(
+  `snapshot written: ${lokasi.length} lokasi, ${kamar.length} kamar, ${denah.length} baris denah`,
+)

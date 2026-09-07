@@ -6,7 +6,7 @@
     },
     {
       "key": "tagline",
-      "value": "Monthly rooms in Batam. Every room status is updated as it changes, so what shows as available really is available."
+      "value": "Kamar kos bulanan di Batam. Status tiap kamar diperbarui begitu berubah, jadi yang tampil tersedia memang benar-benar tersedia."
     },
     {
       "key": "wa_default",
@@ -25,8 +25,8 @@
       "gmaps_url": "https://maps.google.com/?q=1.1204,104.0489",
       "lat": "1.1204",
       "lng": "104.0489",
-      "deskripsi": "A ten minute walk to Mega Mall and the mayor office, one minibus ride to the Batam Centre ferry terminal. Three floors, open corridors, and the gate is locked after eleven at night.",
-      "fasilitas": "Wi-Fi 200 Mbps, Shared kitchen, Washing machine, Motorbike parking, Car parking, CCTV around the clock, Drying area",
+      "deskripsi": "Jalan kaki sepuluh menit ke Mega Mall dan kantor wali kota, sekali naik angkot ke pelabuhan feri Batam Centre. Tiga lantai, koridor terbuka, dan gerbang dikunci setelah pukul sebelas malam.",
+      "fasilitas": "Wi-Fi 200 Mbps, Dapur bersama, Mesin cuci, Parkir motor, Parkir mobil, CCTV 24 jam, Area jemur",
       "nomor_wa": "6281364927150",
       "foto_urls": "https://picsum.photos/seed/kozy-batamcentre-muka/1400/1050, https://picsum.photos/seed/kozy-batamcentre-koridor/1400/1050, https://picsum.photos/seed/kozy-batamcentre-dapur/1400/1050",
       "aktif": "TRUE"
@@ -38,8 +38,8 @@
       "gmaps_url": "https://maps.google.com/?q=1.1465,104.0074",
       "lat": "1.1465",
       "lng": "104.0074",
-      "deskripsi": "On the lane behind Nagoya Hill, next to the row of coffee shops and food stalls that stay open past midnight. Built for shift workers: the corridors and stairwells stay lit all night.",
-      "fasilitas": "Wi-Fi 100 Mbps, Shared kitchen, Washing machine, Motorbike parking, CCTV around the clock, Rooftop",
+      "deskripsi": "Di gang belakang Nagoya Hill, bersebelahan dengan deretan kedai kopi dan warung makan yang buka sampai lewat tengah malam. Dibuat untuk pekerja shift: koridor dan tangga tetap terang sepanjang malam.",
+      "fasilitas": "Wi-Fi 100 Mbps, Dapur bersama, Mesin cuci, Parkir motor, CCTV 24 jam, Rooftop",
       "nomor_wa": "",
       "foto_urls": "https://picsum.photos/seed/kozy-nagoya-muka/1400/1050, https://picsum.photos/seed/kozy-nagoya-rooftop/1400/1050, https://picsum.photos/seed/kozy-nagoya-tangga/1400/1050",
       "aktif": "TRUE"
@@ -54,9 +54,9 @@
       "tipe": "Standard",
       "harga_bulanan": "1250000",
       "status": "kosong",
-      "fasilitas": "Bed 120x200, Wardrobe, Desk, Chair, Ceiling fan, Private bathroom",
+      "fasilitas": "Kasur 120x200, Lemari, Meja, Kursi, Kipas angin plafon, Kamar mandi dalam",
       "foto_urls": "https://picsum.photos/seed/kozy-batam-centre-standard/1000/750",
-      "catatan": "Closest to the front door",
+      "catatan": "Paling dekat pintu depan",
       "aktif": "TRUE"
     },
     {
@@ -67,7 +67,7 @@
       "tipe": "Standard",
       "harga_bulanan": "1250000",
       "status": "terisi",
-      "fasilitas": "Bed 120x200, Wardrobe, Desk, Chair, Ceiling fan, Private bathroom",
+      "fasilitas": "Kasur 120x200, Lemari, Meja, Kursi, Kipas angin plafon, Kamar mandi dalam",
       "foto_urls": "https://picsum.photos/seed/kozy-batam-centre-standard/1000/750",
       "catatan": "",
       "aktif": "TRUE"
@@ -80,7 +80,7 @@
       "tipe": "Standard",
       "harga_bulanan": "1250000",
       "status": "terisi",
-      "fasilitas": "Bed 120x200, Wardrobe, Desk, Chair, Ceiling fan, Private bathroom",
+      "fasilitas": "Kasur 120x200, Lemari, Meja, Kursi, Kipas angin plafon, Kamar mandi dalam",
       "foto_urls": "https://picsum.photos/seed/kozy-batam-centre-standard/1000/750",
       "catatan": "",
       "aktif": "TRUE"
@@ -93,7 +93,7 @@
       "tipe": "Standard",
       "harga_bulanan": "1250000",
       "status": "kosong",
-      "fasilitas": "Bed 120x200, Wardrobe, Desk, Chair, Ceiling fan, Private bathroom",
+      "fasilitas": "Kasur 120x200, Lemari, Meja, Kursi, Kipas angin plafon, Kamar mandi dalam",
       "foto_urls": "https://picsum.photos/seed/kozy-batam-centre-standard/1000/750",
       "catatan": "",
       "aktif": "TRUE"
@@ -106,9 +106,9 @@
       "tipe": "Standard",
       "harga_bulanan": "1250000",
       "status": "dibooking",
-      "fasilitas": "Bed 120x200, Wardrobe, Desk, Chair, Ceiling fan, Private bathroom",
+      "fasilitas": "Kasur 120x200, Lemari, Meja, Kursi, Kipas angin plafon, Kamar mandi dalam",
       "foto_urls": "https://picsum.photos/seed/kozy-batam-centre-standard/1000/750",
-      "catatan": "Held until 18 September",
+      "catatan": "Ditahan sampai 18 September",
       "aktif": "TRUE"
     },
     {
@@ -119,7 +119,7 @@
       "tipe": "Standard",
       "harga_bulanan": "1250000",
       "status": "terisi",
-      "fasilitas": "Bed 120x200, Wardrobe, Desk, Chair, Ceiling fan, Private bathroom",
+      "fasilitas": "Kasur 120x200, Lemari, Meja, Kursi, Kipas angin plafon, Kamar mandi dalam",
       "foto_urls": "https://picsum.photos/seed/kozy-batam-centre-standard/1000/750",
       "catatan": "",
       "aktif": "TRUE"
@@ -132,9 +132,9 @@
       "tipe": "Deluxe AC",
       "harga_bulanan": "1850000",
       "status": "kosong",
-      "fasilitas": "Bed 160x200, Wardrobe, Work desk, Chair, Air conditioning, Private bathroom, Water heater",
+      "fasilitas": "Kasur 160x200, Lemari, Meja kerja, Kursi, AC, Kamar mandi dalam, Pemanas air",
       "foto_urls": "https://picsum.photos/seed/kozy-batam-centre-deluxe-ac/1000/750",
-      "catatan": "Window faces the inner garden",
+      "catatan": "Jendela menghadap taman dalam",
       "aktif": "TRUE"
     },
     {
@@ -145,7 +145,7 @@
       "tipe": "Deluxe AC",
       "harga_bulanan": "1850000",
       "status": "terisi",
-      "fasilitas": "Bed 160x200, Wardrobe, Work desk, Chair, Air conditioning, Private bathroom, Water heater",
+      "fasilitas": "Kasur 160x200, Lemari, Meja kerja, Kursi, AC, Kamar mandi dalam, Pemanas air",
       "foto_urls": "https://picsum.photos/seed/kozy-batam-centre-deluxe-ac/1000/750",
       "catatan": "",
       "aktif": "TRUE"
@@ -158,7 +158,7 @@
       "tipe": "Deluxe AC",
       "harga_bulanan": "1850000",
       "status": "kosong",
-      "fasilitas": "Bed 160x200, Wardrobe, Work desk, Chair, Air conditioning, Private bathroom, Water heater",
+      "fasilitas": "Kasur 160x200, Lemari, Meja kerja, Kursi, AC, Kamar mandi dalam, Pemanas air",
       "foto_urls": "https://picsum.photos/seed/kozy-batam-centre-deluxe-ac/1000/750",
       "catatan": "",
       "aktif": "TRUE"
@@ -171,7 +171,7 @@
       "tipe": "Deluxe AC",
       "harga_bulanan": "1850000",
       "status": "kosong",
-      "fasilitas": "Bed 160x200, Wardrobe, Work desk, Chair, Air conditioning, Private bathroom, Water heater",
+      "fasilitas": "Kasur 160x200, Lemari, Meja kerja, Kursi, AC, Kamar mandi dalam, Pemanas air",
       "foto_urls": "https://picsum.photos/seed/kozy-batam-centre-deluxe-ac/1000/750",
       "catatan": "",
       "aktif": "TRUE"
@@ -184,7 +184,7 @@
       "tipe": "Deluxe AC",
       "harga_bulanan": "1850000",
       "status": "terisi",
-      "fasilitas": "Bed 160x200, Wardrobe, Work desk, Chair, Air conditioning, Private bathroom, Water heater",
+      "fasilitas": "Kasur 160x200, Lemari, Meja kerja, Kursi, AC, Kamar mandi dalam, Pemanas air",
       "foto_urls": "https://picsum.photos/seed/kozy-batam-centre-deluxe-ac/1000/750",
       "catatan": "",
       "aktif": "TRUE"
@@ -197,9 +197,9 @@
       "tipe": "Deluxe AC",
       "harga_bulanan": "1850000",
       "status": "dibooking",
-      "fasilitas": "Bed 160x200, Wardrobe, Work desk, Chair, Air conditioning, Private bathroom, Water heater",
+      "fasilitas": "Kasur 160x200, Lemari, Meja kerja, Kursi, AC, Kamar mandi dalam, Pemanas air",
       "foto_urls": "https://picsum.photos/seed/kozy-batam-centre-deluxe-ac/1000/750",
-      "catatan": "Held until 12 September",
+      "catatan": "Ditahan sampai 12 September",
       "aktif": "TRUE"
     },
     {
@@ -210,9 +210,9 @@
       "tipe": "Studio",
       "harga_bulanan": "2650000",
       "status": "kosong",
-      "fasilitas": "Bed 160x200, Wardrobe, Work desk, Sofa, Air conditioning, Private bathroom, Water heater, Pantry, Balcony",
+      "fasilitas": "Kasur 160x200, Lemari, Meja kerja, Sofa, AC, Kamar mandi dalam, Pemanas air, Pantry, Balkon",
       "foto_urls": "https://picsum.photos/seed/kozy-batam-centre-studio/1000/750",
-      "catatan": "Balcony faces Engku Putri",
+      "catatan": "Balkon menghadap Engku Putri",
       "aktif": "TRUE"
     },
     {
@@ -223,7 +223,7 @@
       "tipe": "Studio",
       "harga_bulanan": "2650000",
       "status": "terisi",
-      "fasilitas": "Bed 160x200, Wardrobe, Work desk, Sofa, Air conditioning, Private bathroom, Water heater, Pantry, Balcony",
+      "fasilitas": "Kasur 160x200, Lemari, Meja kerja, Sofa, AC, Kamar mandi dalam, Pemanas air, Pantry, Balkon",
       "foto_urls": "https://picsum.photos/seed/kozy-batam-centre-studio/1000/750",
       "catatan": "",
       "aktif": "TRUE"
@@ -236,7 +236,7 @@
       "tipe": "Studio",
       "harga_bulanan": "2650000",
       "status": "kosong",
-      "fasilitas": "Bed 160x200, Wardrobe, Work desk, Sofa, Air conditioning, Private bathroom, Water heater, Pantry, Balcony",
+      "fasilitas": "Kasur 160x200, Lemari, Meja kerja, Sofa, AC, Kamar mandi dalam, Pemanas air, Pantry, Balkon",
       "foto_urls": "https://picsum.photos/seed/kozy-batam-centre-studio/1000/750",
       "catatan": "",
       "aktif": "TRUE"
@@ -249,7 +249,7 @@
       "tipe": "Standard AC",
       "harga_bulanan": "1550000",
       "status": "terisi",
-      "fasilitas": "Bed 120x200, Wardrobe, Desk, Chair, Air conditioning, Private bathroom",
+      "fasilitas": "Kasur 120x200, Lemari, Meja, Kursi, AC, Kamar mandi dalam",
       "foto_urls": "https://picsum.photos/seed/kozy-nagoya-standard-ac/1000/750",
       "catatan": "",
       "aktif": "TRUE"
@@ -262,7 +262,7 @@
       "tipe": "Standard AC",
       "harga_bulanan": "1550000",
       "status": "kosong",
-      "fasilitas": "Bed 120x200, Wardrobe, Desk, Chair, Air conditioning, Private bathroom",
+      "fasilitas": "Kasur 120x200, Lemari, Meja, Kursi, AC, Kamar mandi dalam",
       "foto_urls": "https://picsum.photos/seed/kozy-nagoya-standard-ac/1000/750",
       "catatan": "",
       "aktif": "TRUE"
@@ -275,7 +275,7 @@
       "tipe": "Standard AC",
       "harga_bulanan": "1550000",
       "status": "kosong",
-      "fasilitas": "Bed 120x200, Wardrobe, Desk, Chair, Air conditioning, Private bathroom",
+      "fasilitas": "Kasur 120x200, Lemari, Meja, Kursi, AC, Kamar mandi dalam",
       "foto_urls": "https://picsum.photos/seed/kozy-nagoya-standard-ac/1000/750",
       "catatan": "",
       "aktif": "TRUE"
@@ -288,7 +288,7 @@
       "tipe": "Standard AC",
       "harga_bulanan": "1550000",
       "status": "terisi",
-      "fasilitas": "Bed 120x200, Wardrobe, Desk, Chair, Air conditioning, Private bathroom",
+      "fasilitas": "Kasur 120x200, Lemari, Meja, Kursi, AC, Kamar mandi dalam",
       "foto_urls": "https://picsum.photos/seed/kozy-nagoya-standard-ac/1000/750",
       "catatan": "",
       "aktif": "TRUE"
@@ -301,7 +301,7 @@
       "tipe": "Standard AC",
       "harga_bulanan": "1550000",
       "status": "terisi",
-      "fasilitas": "Bed 120x200, Wardrobe, Desk, Chair, Air conditioning, Private bathroom",
+      "fasilitas": "Kasur 120x200, Lemari, Meja, Kursi, AC, Kamar mandi dalam",
       "foto_urls": "https://picsum.photos/seed/kozy-nagoya-standard-ac/1000/750",
       "catatan": "",
       "aktif": "TRUE"
@@ -314,9 +314,9 @@
       "tipe": "Standard AC",
       "harga_bulanan": "1550000",
       "status": "kosong",
-      "fasilitas": "Bed 120x200, Wardrobe, Desk, Chair, Air conditioning, Private bathroom",
+      "fasilitas": "Kasur 120x200, Lemari, Meja, Kursi, AC, Kamar mandi dalam",
       "foto_urls": "https://picsum.photos/seed/kozy-nagoya-standard-ac/1000/750",
-      "catatan": "End of the corridor, the quietest one",
+      "catatan": "Ujung koridor, paling tenang",
       "aktif": "TRUE"
     },
     {
@@ -327,7 +327,7 @@
       "tipe": "Deluxe",
       "harga_bulanan": "2150000",
       "status": "kosong",
-      "fasilitas": "Bed 160x200, Wardrobe, Work desk, Chair, Air conditioning, Private bathroom, Water heater, Mini fridge",
+      "fasilitas": "Kasur 160x200, Lemari, Meja kerja, Kursi, AC, Kamar mandi dalam, Pemanas air, Kulkas mini",
       "foto_urls": "https://picsum.photos/seed/kozy-nagoya-deluxe/1000/750",
       "catatan": "",
       "aktif": "TRUE"
@@ -340,9 +340,9 @@
       "tipe": "Deluxe",
       "harga_bulanan": "2150000",
       "status": "dibooking",
-      "fasilitas": "Bed 160x200, Wardrobe, Work desk, Chair, Air conditioning, Private bathroom, Water heater, Mini fridge",
+      "fasilitas": "Kasur 160x200, Lemari, Meja kerja, Kursi, AC, Kamar mandi dalam, Pemanas air, Kulkas mini",
       "foto_urls": "https://picsum.photos/seed/kozy-nagoya-deluxe/1000/750",
-      "catatan": "Held until 20 September",
+      "catatan": "Ditahan sampai 20 September",
       "aktif": "TRUE"
     },
     {
@@ -353,7 +353,7 @@
       "tipe": "Deluxe",
       "harga_bulanan": "2150000",
       "status": "terisi",
-      "fasilitas": "Bed 160x200, Wardrobe, Work desk, Chair, Air conditioning, Private bathroom, Water heater, Mini fridge",
+      "fasilitas": "Kasur 160x200, Lemari, Meja kerja, Kursi, AC, Kamar mandi dalam, Pemanas air, Kulkas mini",
       "foto_urls": "https://picsum.photos/seed/kozy-nagoya-deluxe/1000/750",
       "catatan": "",
       "aktif": "TRUE"
@@ -366,9 +366,9 @@
       "tipe": "Deluxe",
       "harga_bulanan": "2150000",
       "status": "kosong",
-      "fasilitas": "Bed 160x200, Wardrobe, Work desk, Chair, Air conditioning, Private bathroom, Water heater, Mini fridge",
+      "fasilitas": "Kasur 160x200, Lemari, Meja kerja, Kursi, AC, Kamar mandi dalam, Pemanas air, Kulkas mini",
       "foto_urls": "https://picsum.photos/seed/kozy-nagoya-deluxe/1000/750",
-      "catatan": "Direct access to the rooftop",
+      "catatan": "Akses langsung ke rooftop",
       "aktif": "TRUE"
     },
     {
@@ -379,7 +379,7 @@
       "tipe": "Deluxe",
       "harga_bulanan": "2150000",
       "status": "terisi",
-      "fasilitas": "Bed 160x200, Wardrobe, Work desk, Chair, Air conditioning, Private bathroom, Water heater, Mini fridge",
+      "fasilitas": "Kasur 160x200, Lemari, Meja kerja, Kursi, AC, Kamar mandi dalam, Pemanas air, Kulkas mini",
       "foto_urls": "https://picsum.photos/seed/kozy-nagoya-deluxe/1000/750",
       "catatan": "",
       "aktif": "TRUE"
@@ -392,10 +392,61 @@
       "tipe": "Deluxe",
       "harga_bulanan": "2150000",
       "status": "terisi",
-      "fasilitas": "Bed 160x200, Wardrobe, Work desk, Chair, Air conditioning, Private bathroom, Water heater, Mini fridge",
+      "fasilitas": "Kasur 160x200, Lemari, Meja kerja, Kursi, AC, Kamar mandi dalam, Pemanas air, Kulkas mini",
       "foto_urls": "https://picsum.photos/seed/kozy-nagoya-deluxe/1000/750",
       "catatan": "",
       "aktif": "TRUE"
+    }
+  ],
+  "denah": [
+    {
+      "lokasi_slug": "batam-centre",
+      "lantai": "1",
+      "baris": "1",
+      "sel": "pintu, ., ., .",
+      "arah": "utara"
+    },
+    {
+      "lokasi_slug": "batam-centre",
+      "lantai": "1",
+      "baris": "2",
+      "sel": "A1, A2, A3, tangga",
+      "arah": ""
+    },
+    {
+      "lokasi_slug": "batam-centre",
+      "lantai": "1",
+      "baris": "3",
+      "sel": "lorong, lorong, lorong, lorong",
+      "arah": ""
+    },
+    {
+      "lokasi_slug": "batam-centre",
+      "lantai": "1",
+      "baris": "4",
+      "sel": "A4, A5, A6, lift",
+      "arah": ""
+    },
+    {
+      "lokasi_slug": "batam-centre",
+      "lantai": "2",
+      "baris": "1",
+      "sel": "B1, B2, B3, WC",
+      "arah": ""
+    },
+    {
+      "lokasi_slug": "batam-centre",
+      "lantai": "2",
+      "baris": "2",
+      "sel": "lorong, lorong, lorong, lorong",
+      "arah": ""
+    },
+    {
+      "lokasi_slug": "batam-centre",
+      "lantai": "2",
+      "baris": "3",
+      "sel": "B4, B5, B6, tangga",
+      "arah": ""
     }
   ]
 }

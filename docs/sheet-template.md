@@ -1,6 +1,7 @@
 # Struktur Google Sheet
 
-Satu spreadsheet, tiga tab. Nama tab harus persis seperti di bawah (huruf kecil).
+Satu spreadsheet, tiga tab wajib (`config`, `lokasi`, `kamar`) dan satu tab
+opsional (`denah`). Nama tab harus persis seperti di bawah (huruf kecil).
 Baris pertama tiap tab adalah header dan tidak boleh diubah namanya.
 
 Template siap pakai ada di [`docs/kozy-sheet-template.xlsx`](kozy-sheet-template.xlsx).
@@ -35,24 +36,24 @@ Unggah ke Google Drive, buka dengan Google Sheets, lalu isi datanya.
 Satu baris untuk satu kamar fisik. Kamar inilah yang muncul sebagai kotak di
 denah kamar.
 
-| Kolom           | Isi                                                              | Contoh                        |
-| --------------- | ---------------------------------------------------------------- | ----------------------------- |
-| `kode`          | Kode kamar, tampil di denah                                      | `B3`                          |
-| `lokasi_slug`   | Harus sama persis dengan `slug` di tab `lokasi`                  | `batam-centre`                |
-| `lantai`        | Angka, menentukan pengelompokan di denah                         | `2`                           |
-| `luas_m2`       | Angka                                                            | `16`                          |
-| `tipe`          | **Nama tipe bebas.** Ditulis sama persis untuk kamar yang setipe | `Deluxe AC`                   |
-| `harga_bulanan` | Angka, boleh pakai titik                                         | `1850000`                     |
-| `status`        | `kosong`, `dibooking`, atau `terisi`                             | `kosong`                      |
-| `fasilitas`     | Dipisah koma                                                     | `AC, Kamar mandi dalam`       |
-| `foto_urls`     | Dipisah koma                                                     |                               |
-| `catatan`       | Satu kalimat, boleh kosong                                       | `Ditahan sampai 18 September` |
-| `aktif`         | `TRUE` tampil, `FALSE` disembunyikan                             | `TRUE`                        |
+| Kolom           | Isi                                                                                                        | Contoh                        |
+| --------------- | ---------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| `kode`          | Kode kamar, tampil di denah                                                                                | `B3`                          |
+| `lokasi_slug`   | Harus sama persis dengan `slug` di tab `lokasi`                                                            | `batam-centre`                |
+| `lantai`        | Angka, menentukan pengelompokan di denah                                                                   | `2`                           |
+| `luas_m2`       | Angka                                                                                                      | `16`                          |
+| `tipe`          | **Nama tipe bebas.** Ditulis sama persis untuk kamar yang setipe                                           | `Deluxe AC`                   |
+| `harga_bulanan` | Angka, boleh pakai titik                                                                                   | `1850000`                     |
+| `status`        | `kosong`, `dibooking`, atau `terisi`                                                                       | `kosong`                      |
+| `fasilitas`     | Dipisah koma                                                                                               | `AC, Kamar mandi dalam`       |
+| `foto_urls`     | Dipisah koma                                                                                               |                               |
+| `catatan`       | Satu kalimat, boleh kosong. Tampil saat pengunjung ketuk kamar, dan kamarnya diberi titik penanda di denah | `Ditahan sampai 18 September` |
+| `aktif`         | `TRUE` tampil, `FALSE` disembunyikan                                                                       | `TRUE`                        |
 
 ### Aturan penting soal `tipe`
 
-Kolom `tipe` adalah yang mengelompokkan kamar menjadi kartu tipe kamar dan
-halaman `/locations/{slug}/type/{tipe}`. Karena itu:
+Kolom `tipe` adalah yang mengelompokkan kamar menjadi daftar tipe di halaman
+lokasi. Karena itu:
 
 - **Tulis sama persis** untuk kamar yang setipe. `Deluxe AC` dan `deluxe ac`
   dianggap tipe yang sama, tetapi `Deluxe AC` dan `Deluxe A/C` menjadi dua tipe.
@@ -64,6 +65,38 @@ halaman `/locations/{slug}/type/{tipe}`. Karena itu:
   kamar bertipe itu. Kalau satu kamar tidak punya AC, AC tidak akan muncul di
   kartu tipe. Ini disengaja supaya tidak menjanjikan yang tidak ada.
 
+## Tab `denah` (opsional)
+
+Menggambar tata letak tiap lantai supaya calon penyewa bisa membayangkan posisi
+kamar: baris, lorong, pintu, tangga, lift, dan arah mata angin. **Boleh
+dikosongkan atau tidak dibuat sama sekali.** Tanpa tab ini, denah kamar tetap
+tampil seperti biasa, yaitu daftar kotak kamar per lantai. Bisa juga digambar
+sebagian, misalnya hanya lantai 1, sisanya otomatis memakai daftar biasa.
+
+Satu baris di tab ini sama dengan satu baris kotak di denah, dari depan ke
+belakang.
+
+| Kolom         | Isi                                                                                           | Contoh                       |
+| ------------- | --------------------------------------------------------------------------------------------- | ---------------------------- |
+| `lokasi_slug` | Harus sama persis dengan `slug` di tab `lokasi`                                               | `batam-centre`               |
+| `lantai`      | Angka, sama dengan `lantai` di tab `kamar`                                                    | `1`                          |
+| `baris`       | Urutan baris denah. `1` paling depan, lalu `2`, `3`, dan seterusnya                           | `2`                          |
+| `sel`         | Isi kotak dari kiri ke kanan, dipisah koma                                                    | `A1, A2, lorong, A3, tangga` |
+| `arah`        | **Boleh kosong.** Diisi di salah satu baris lantai saja: `utara`, `selatan`, `timur`, `barat` | `utara`                      |
+
+Isi yang dikenali di kolom `sel`:
+
+- **Kode kamar** seperti `A1`. Harus cocok dengan `kode` di tab `kamar` untuk
+  lokasi dan lantai yang sama. Huruf besar atau kecil sama saja.
+- **`pintu`, `tangga`, `lift`, `lorong`** tampil dengan ikon.
+- **Titik (`.`)** berarti kotak kosong, dipakai untuk merapikan posisi.
+- **Tulisan lain** seperti `WC`, `Dapur`, `Mushola` tampil apa adanya sebagai
+  penanda. Tidak perlu minta developer menambah kata baru.
+
+Aman kalau salah ketik: kode kamar yang tidak dikenali tidak membuat kamarnya
+hilang. Kamar yang belum diletakkan di denah muncul di bagian **Belum
+dipetakan** di bawah denah lantainya.
+
 ## Data validation yang wajib dipasang
 
 Dipasang sekali oleh developer, mencegah salah ketik dari HP.
@@ -73,12 +106,15 @@ Dipasang sekali oleh developer, mencegah salah ketik dari HP.
 3. `kamar!E:E` (`tipe`): Dropdown berisi daftar nama tipe yang dipakai. Tambah
    item baru di sini setiap kali ada tipe baru.
 4. `lokasi!K:K` dan `kamar!K:K` (`aktif`): Dropdown > `TRUE`, `FALSE`.
-5. Baris 1 di ketiga tab: klik kanan > Protect range, hanya pemilik yang boleh mengubah.
+5. Baris 1 di setiap tab: klik kanan > Protect range, hanya pemilik yang boleh mengubah.
+6. Kalau tab `denah` dipakai: `denah!A:A` (`lokasi_slug`) dropdown dari `lokasi!A2:A`,
+   dan `denah!E:E` (`arah`) dropdown `utara`, `selatan`, `timur`, `barat`.
 
 ## Sharing
 
 File > Share > General access > **Anyone with the link** > **Viewer**.
-Tanpa itu website tidak bisa membaca datanya dan akan menampilkan data cadangan.
+Tanpa itu website tidak bisa membaca datanya dan akan menampilkan salinan
+terakhir yang berhasil dibaca.
 
 ## Toleransi kesalahan
 
@@ -86,5 +122,6 @@ Tanpa itu website tidak bisa membaca datanya dan akan menampilkan data cadangan.
 - `status` yang tidak dikenali dianggap `terisi`, supaya kamar tidak salah dijual.
 - `tipe` yang kosong dianggap `Standard`.
 - Harga boleh ditulis `Rp 1.850.000`, tetap terbaca sebagai angka.
-- Kolom yang hilang atau sharing yang dicabut membuat website memakai
-  `src/data/snapshot.json` yang tersimpan di kode. Halaman tidak pernah kosong.
+- Kolom yang hilang atau sharing yang dicabut membuat website memakai salinan
+  terakhir yang berhasil dibaca. Kalau belum pernah berhasil, muncul halaman
+  "sementara tidak tersedia" sampai Sheet bisa dibaca lagi.

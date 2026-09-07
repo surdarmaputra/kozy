@@ -17,12 +17,18 @@ export const Route = createFileRoute('/purge')({
   }),
   head: () => ({
     meta: [
-      { title: 'Refresh the website' },
+      { title: 'Perbarui website' },
       { name: 'robots', content: 'noindex' },
     ],
   }),
   component: Purge,
 })
+
+const SOURCE_LABEL = {
+  sheet: 'Google Sheet (langsung)',
+  cache: 'Salinan tersimpan, Sheet tidak terjangkau',
+  seed: 'Data contoh, SHEET_ID belum diisi',
+} as const
 
 function Purge() {
   const result = Route.useLoaderData()
@@ -33,7 +39,7 @@ function Purge() {
       id="konten"
       className="mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col justify-center px-4 py-16"
     >
-      <div className="rounded-xl border border-border bg-card p-7 sm:p-9">
+      <div className="card-soft rounded-xl bg-card p-7 sm:p-9">
         <Icon
           className={`size-9 ${result.ok ? 'text-status-kosong' : 'text-status-dibooking'}`}
           aria-hidden
@@ -46,20 +52,18 @@ function Purge() {
         </p>
 
         {result.diagnostics ? (
-          <dl className="mt-7 grid grid-cols-2 gap-x-6 gap-y-4 border-t border-border pt-6 text-sm">
+          <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
             <div>
-              <dt className="text-muted-foreground">Data source</dt>
+              <dt className="text-muted-foreground">Sumber data</dt>
               <dd className="mt-0.5 font-semibold">
-                {result.diagnostics.source === 'sheet'
-                  ? 'Google Sheet'
-                  : 'Committed snapshot'}
+                {SOURCE_LABEL[result.diagnostics.source]}
               </dd>
             </div>
             <div>
-              <dt className="text-muted-foreground">Read</dt>
+              <dt className="text-muted-foreground">Terbaca</dt>
               <dd className="num mt-0.5 font-semibold">
-                {result.diagnostics.lokasi} locations,{' '}
-                {result.diagnostics.kamar} rooms
+                {result.diagnostics.lokasi} lokasi, {result.diagnostics.kamar}{' '}
+                kamar
               </dd>
             </div>
           </dl>
@@ -68,7 +72,7 @@ function Purge() {
         {result.diagnostics && result.diagnostics.skipped.length > 0 ? (
           <div className="mt-6 rounded-lg bg-status-dibooking-surface p-4">
             <p className="text-sm font-semibold text-status-dibooking">
-              These rows were skipped because their data is incomplete
+              Baris berikut dilewati karena datanya belum lengkap
             </p>
             <ul className="mt-2 space-y-1 text-sm text-status-dibooking">
               {result.diagnostics.skipped.slice(0, 8).map((item) => (
@@ -79,7 +83,7 @@ function Purge() {
         ) : null}
 
         <Button asChild className="mt-8 h-11 w-full">
-          <Link to="/">Open the website</Link>
+          <Link to="/">Buka website</Link>
         </Button>
       </div>
     </main>

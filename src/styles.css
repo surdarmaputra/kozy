@@ -3,8 +3,10 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
-/* Theme follows the device. No toggle, no flash of the wrong palette, no JS. */
-@custom-variant dark (@media (prefers-color-scheme: dark));
+/* One light theme. No dark mode, no toggle, no JS, no flash of the wrong palette.
+   The `dark` variant is pinned to a selector that never appears, so the `dark:`
+   utilities left in the shadcn primitives stay inert. */
+@custom-variant dark (&:where(.dark, .dark *));
 
 /*
   Palette: warm stone neutrals with one accent, a deep leaf green.
@@ -54,48 +56,6 @@
   --sidebar-accent-foreground: oklch(0.3 0.014 75);
   --sidebar-border: oklch(0.905 0.008 88);
   --sidebar-ring: oklch(0.475 0.107 158);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: oklch(0.178 0.008 75);
-    --foreground: oklch(0.945 0.006 92);
-    --card: oklch(0.216 0.009 75);
-    --card-foreground: oklch(0.945 0.006 92);
-    --popover: oklch(0.216 0.009 75);
-    --popover-foreground: oklch(0.945 0.006 92);
-
-    --primary: oklch(0.735 0.128 158);
-    --primary-foreground: oklch(0.19 0.03 158);
-    --secondary: oklch(0.262 0.009 75);
-    --secondary-foreground: oklch(0.93 0.006 92);
-    --muted: oklch(0.262 0.009 75);
-    --muted-foreground: oklch(0.715 0.012 88);
-    --accent: oklch(0.3 0.032 158);
-    --accent-foreground: oklch(0.86 0.09 158);
-    --destructive: oklch(0.68 0.17 27);
-    --destructive-foreground: oklch(0.18 0.02 27);
-
-    --border: oklch(0.305 0.009 75);
-    --input: oklch(0.335 0.009 75);
-    --ring: oklch(0.735 0.128 158);
-
-    --status-kosong: oklch(0.775 0.13 158);
-    --status-kosong-surface: oklch(0.295 0.045 158);
-    --status-dibooking: oklch(0.8 0.115 75);
-    --status-dibooking-surface: oklch(0.312 0.045 70);
-    --status-terisi: oklch(0.7 0.008 88);
-    --status-terisi-surface: oklch(0.268 0.007 75);
-
-    --sidebar: oklch(0.216 0.009 75);
-    --sidebar-foreground: oklch(0.945 0.006 92);
-    --sidebar-primary: oklch(0.735 0.128 158);
-    --sidebar-primary-foreground: oklch(0.19 0.03 158);
-    --sidebar-accent: oklch(0.262 0.009 75);
-    --sidebar-accent-foreground: oklch(0.93 0.006 92);
-    --sidebar-border: oklch(0.305 0.009 75);
-    --sidebar-ring: oklch(0.735 0.128 158);
-  }
 }
 
 @theme inline {
@@ -167,6 +127,99 @@
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
     font-feature-settings: 'tnum';
+  }
+}
+
+/* One entrance move, used sparingly on first paint. A short fade and a small
+   rise, nothing that delays reading. The reduced-motion block below collapses
+   it, and `both` keeps the element hidden only for the split second before it
+   plays. Stagger with an inline or arbitrary `animation-delay`. */
+@layer utilities {
+  @keyframes kozy-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .reveal {
+    animation-name: kozy-reveal;
+    animation-duration: 0.55s;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    animation-fill-mode: both;
+  }
+
+  /* Soft elevation instead of a hard border. One shadow, tinted with the text
+     hue so it never reads as a grey box on the warm ground. */
+  .card-soft {
+    box-shadow:
+      0 1px 2px oklch(0.216 0.012 75 / 0.05),
+      0 6px 16px -6px oklch(0.216 0.012 75 / 0.08);
+  }
+
+  .card-soft-hover:hover {
+    box-shadow:
+      0 1px 2px oklch(0.216 0.012 75 / 0.06),
+      0 12px 30px -8px oklch(0.216 0.012 75 / 0.16);
+  }
+
+  /* CTA attention: the icon rings once every few seconds, mostly at rest.
+     Hover pauses the loop and the button's own transform takes over. */
+  @keyframes kozy-cta-ring {
+    0%,
+    72%,
+    100% {
+      transform: rotate(0);
+    }
+    78% {
+      transform: rotate(-12deg);
+    }
+    84% {
+      transform: rotate(9deg);
+    }
+    90% {
+      transform: rotate(-4deg);
+    }
+    95% {
+      transform: rotate(0);
+    }
+  }
+
+  .cta-icon {
+    animation: kozy-cta-ring 4.5s ease-in-out infinite;
+    transform-origin: 50% 62%;
+  }
+
+  .group:hover .cta-icon {
+    animation-play-state: paused;
+  }
+
+  /* CTA nudge: an arrow that drifts forward on the same slow cadence. */
+  @keyframes kozy-cta-nudge {
+    0%,
+    68%,
+    100% {
+      transform: translateX(0);
+    }
+    80% {
+      transform: translateX(3px);
+    }
+    90% {
+      transform: translateX(0);
+    }
+  }
+
+  .cta-arrow {
+    animation: kozy-cta-nudge 4s ease-in-out infinite;
+  }
+
+  .group:hover .cta-arrow {
+    transform: translateX(3px);
+    animation-play-state: paused;
   }
 }
 

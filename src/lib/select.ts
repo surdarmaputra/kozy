@@ -1,4 +1,4 @@
-import type { Catalog, Kamar, Lokasi } from './schema'
+import type { Arah, Catalog, DenahRow, Kamar, Lokasi } from './schema'
 
 export type LokasiSummary = Lokasi & {
   kamarKosong: number
@@ -70,7 +70,6 @@ export type RoomType = {
    *  promise an AC to whoever ends up in the room without one. */
   fasilitas: Array<string>
   foto: string
-  catatan: string
 }
 
 export function tipeSlug(tipe: string): string {
@@ -79,6 +78,93 @@ export function tipeSlug(tipe: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
+}
+
+export type PlanMarker = 'pintu' | 'tangga' | 'lift' | 'lorong'
+
+const planMarkers: ReadonlyArray<PlanMarker> = [
+  'pintu',
+  'tangga',
+  'lift',
+  'lorong',
+]
+
+/** One square of a floor drawing. `spot` is any token the owner typed that is
+ *  neither a known marker nor a room code on this location, shown verbatim. */
+export type PlanCell =
+  | { kind: 'room'; room: Kamar }
+  | { kind: 'marker'; marker: PlanMarker }
+  | { kind: 'spot'; label: string }
+  | { kind: 'gap' }
+
+export type FloorPlan = {
+  lantai: number
+  arah: Arah | ''
+  rows: Array<Array<PlanCell>>
+  /** Active rooms on this floor the drawing left out. Rendered as a plain wrap
+   *  row so a typo in `denah` can never hide a room. */
+  unmapped: Array<Kamar>
+}
+
+function toCell(
+  token: string,
+  byCode: Map<string, Kamar>,
+  placed: Set<string>,
+): PlanCell {
+  const key = token.toLowerCase()
+  if (token === '.' || token === '') return { kind: 'gap' }
+  if ((planMarkers as ReadonlyArray<string>).includes(key))
+    return { kind: 'marker', marker: key as PlanMarker }
+  const room = byCode.get(key)
+  if (room) {
+    placed.add(key)
+    return { kind: 'room', room }
+  }
+  return { kind: 'spot', label: token }
+}
+
+/** Turns the `denah` rows for a location into one drawing per floor. Returns an
+ *  empty array when the location has no `denah` rows; a floor with no rows is
+ *  simply absent, and the caller renders it as the plain per-floor listing. */
+export function floorPlansFor(
+  catalog: Catalog,
+  slug: string,
+): Array<FloorPlan> {
+  const target = slug.toLowerCase()
+  const forLokasi = (catalog.denah ?? []).filter(
+    (row) => row.lokasi_slug === target,
+  )
+  if (forLokasi.length === 0) return []
+
+  const rooms = roomsFor(catalog, slug)
+  const byCode = new Map(rooms.map((room) => [room.kode.toLowerCase(), room]))
+
+  const floors = new Map<number, Array<DenahRow>>()
+  forLokasi.forEach((row) => {
+    const bucket = floors.get(row.lantai) ?? []
+    bucket.push(row)
+    floors.set(row.lantai, bucket)
+  })
+
+  const placed = new Set<string>()
+  const built = [...floors.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([lantai, floorRows]) => {
+      const arah: Arah | '' =
+        floorRows.find((row) => row.arah !== '')?.arah ?? ''
+      const rows = [...floorRows]
+        .sort((a, b) => a.baris - b.baris)
+        .map((row) => row.sel.map((token) => toCell(token, byCode, placed)))
+      return { lantai, arah, rows }
+    })
+
+  return built.map((floor) => ({
+    ...floor,
+    unmapped: rooms.filter(
+      (room) =>
+        room.lantai === floor.lantai && !placed.has(room.kode.toLowerCase()),
+    ),
+  }))
 }
 
 export function roomTypesFor(catalog: Catalog, slug: string): Array<RoomType> {
@@ -114,20 +200,7 @@ export function roomTypesFor(catalog: Catalog, slug: string): Array<RoomType> {
         fasilitas: shared,
         foto:
           rooms.find((room) => room.foto_urls.length > 0)?.foto_urls[0] ?? '',
-        catatan:
-          rooms.find((room) => room.status === 'kosong' && room.catatan)
-            ?.catatan ?? '',
       }
     })
     .sort((a, b) => b.kosong - a.kosong || a.hargaMin - b.hargaMin)
-}
-
-export function findRoomType(
-  catalog: Catalog,
-  slug: string,
-  tipe: string,
-): RoomType | undefined {
-  return roomTypesFor(catalog, slug).find(
-    (type) => type.slug === tipe.toLowerCase(),
-  )
 }

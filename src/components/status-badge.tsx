@@ -2,11 +2,12 @@ import { cn } from '#/lib/utils'
 import type { RoomStatus } from '#/lib/schema'
 
 /** The Sheet keeps its own vocabulary (kosong / dibooking / terisi) because the
- *  owner types those values. The site shows the English reading of them. */
+ *  owner types those values. The site shows a friendly reading of them, and this
+ *  map is the one place that reading is defined. */
 export const statusLabel: Record<RoomStatus, string> = {
-  kosong: 'Available',
-  dibooking: 'Reserved',
-  terisi: 'Occupied',
+  kosong: 'Tersedia',
+  dibooking: 'Dibooking',
+  terisi: 'Terisi',
 }
 
 const statusStyle: Record<RoomStatus, string> = {
@@ -36,8 +37,9 @@ export function StatusBadge({
 }
 
 /** Reading key for the room map. Three states is few enough that a legend beats
- *  a tooltip nobody taps on a phone. */
-export function StatusLegend() {
+ *  a tooltip nobody taps on a phone. `hasNotes` adds the key for the dot that
+ *  marks rooms the owner left a note on in the Sheet. */
+export function StatusLegend({ hasNotes = false }: { hasNotes?: boolean }) {
   return (
     <ul className="flex flex-wrap items-center gap-x-4 gap-y-2">
       {(['kosong', 'dibooking', 'terisi'] as Array<RoomStatus>).map(
@@ -58,6 +60,15 @@ export function StatusLegend() {
           </li>
         ),
       )}
+      {hasNotes ? (
+        <li className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span
+            aria-hidden
+            className="size-2.5 rounded-full bg-status-dibooking ring-2 ring-card"
+          />
+          Ada catatan
+        </li>
+      ) : null}
     </ul>
   )
 }

@@ -12,7 +12,7 @@ tidak perlu menghubungi developer.
 4. Buka website, tarik layar ke bawah untuk refresh. Warna kotak kamar di denah
    sudah berubah.
 
-Tanpa langkah 3 pun perubahan tetap muncul sendiri dalam 5 menit.
+Tanpa langkah 3 pun perubahan tetap muncul sendiri dalam 1-2 menit.
 Bookmark itu hanya untuk yang tidak mau menunggu.
 
 ## 2. Mengubah harga
@@ -55,13 +55,34 @@ Datanya tetap tersimpan dan bisa ditampilkan lagi kapan saja.
 2. Salin tautannya ke kolom `foto_urls`. Beberapa foto dipisah koma.
 3. Buka bookmark **Perbarui website**.
 
+## 7. Menggambar denah lantai (opsional)
+
+Kalau ingin denah kamar terlihat seperti tata letak asli, bukan sekadar daftar
+kotak, isi tab `denah`. Boleh dikosongkan, boleh digambar sebagian saja.
+
+1. Tab `denah`. Satu baris untuk satu baris kotak di denah, dari depan ke
+   belakang. Isi `lokasi_slug`, `lantai`, dan `baris` (`1`, `2`, `3`).
+2. Kolom `sel`: tulis isi kotak dari kiri ke kanan, dipisah koma. Contoh:
+   `A1, A2, lorong, A3, tangga`.
+   - Kode kamar harus sama dengan kolom `kode` di tab `kamar`.
+   - Kata `pintu`, `tangga`, `lift`, `lorong` tampil dengan ikon.
+   - Titik (`.`) berarti kotak kosong.
+   - Tulisan lain seperti `WC` atau `Dapur` tampil apa adanya.
+3. Kolom `arah` boleh dikosongkan. Isi `utara`, `selatan`, `timur`, atau `barat`
+   di salah satu baris lantai untuk menampilkan kompas.
+4. Buka bookmark **Perbarui website**.
+
+Kalau ada kode kamar yang salah ketik, kamarnya tidak hilang. Kamar yang belum
+diletakkan muncul di bagian **Belum dipetakan** di bawah denah lantai itu.
+
 ## Kalau ada yang aneh
 
 Buka bookmark **Perbarui website**. Halaman itu menyebutkan:
 
-- **Data source**: harus tertulis "Google Sheet". Kalau tertulis "Committed snapshot", berarti website tidak bisa membaca Sheet. Cek File > Share, pastikan masih **Anyone with the link, Viewer**.
-- **Read**: jumlah lokasi dan kamar yang berhasil dibaca.
+- **Sumber data**: harus tertulis "Google Sheet (langsung)". Kalau tertulis "Salinan tersimpan, Sheet tidak terjangkau" atau "Data contoh, SHEET_ID belum diisi", berarti website tidak bisa membaca Sheet. Cek File > Share, pastikan masih **Anyone with the link, Viewer**.
+- **Terbaca**: jumlah lokasi dan kamar yang berhasil dibaca.
 - **Baris yang dilewati**: nomor baris yang datanya belum lengkap. Perbaiki baris itu di Sheet, lalu buka bookmark lagi.
 
-Website tidak pernah kosong. Kalau Sheet bermasalah, yang tampil adalah
-data terakhir yang tersimpan di kode.
+Kalau Sheet bermasalah, yang tampil adalah salinan terakhir yang berhasil
+dibaca website. Kalau website belum pernah berhasil membaca Sheet sama sekali,
+muncul halaman "sementara tidak tersedia" sampai Sheet bisa dibaca lagi.

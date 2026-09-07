@@ -8,7 +8,7 @@
 | fns / vars          | camelCase                                                              |
 | lib files           | kebab-case, one concern per file                                       |
 | Sheet-derived types | keep the Sheet's Indonesian names (`Kamar`, `Lokasi`, `harga_bulanan`) |
-| UI-facing strings   | English                                                                |
+| UI-facing strings   | Indonesian                                                             |
 
 Sheet-shaped identifiers stay Indonesian on purpose: they map one-to-one to
 columns the owner sees. Renaming them breaks that correspondence and the docs.
@@ -51,19 +51,21 @@ anywhere else is a G1 failure.
 - One radius scale, driven by `--radius`.
 - Plus Jakarta Sans for text; JetBrains Mono via `.num` for prices, room codes,
   sizes and counts — anything a reader compares down a column.
-- Dark mode is `prefers-color-scheme` only, redefining tokens under
-  `@media`. No `.dark` class, no toggle, no JS, no flash.
+- One light theme. No dark mode: no `prefers-color-scheme` token block, no
+  `.dark` class, no toggle, no JS. The `dark` custom-variant is pinned to a
+  selector that never appears, so the `dark:` utilities left in the shadcn
+  primitives stay inert.
 - Mobile first: the room map and type grid must stay usable at 390px, and no
   page may scroll horizontally at any width.
 
 ## #copy
 
-- UI is English. No em-dashes (`—`) anywhere visible; use a comma, a period, or
-  a hyphen.
+- UI is Indonesian. No em-dashes (`—`) anywhere visible; use a comma, a period,
+  or a hyphen.
 - Never name a person or role behind the WhatsApp number. It may be the owner's
   or a shared line; "penjaga kos" claims something we cannot guarantee.
 - Prices via `formatRupiah`. Never hand-format a rupiah string.
-- One label per intent. "Chat on WhatsApp" is the contact CTA everywhere;
+- One label per intent. "Chat via WhatsApp" is the contact CTA everywhere;
   don't invent a synonym per section.
 
 ## #generated
@@ -73,17 +75,18 @@ Never hand-edit:
 | File                            | Regenerate with                                                    |
 | ------------------------------- | ------------------------------------------------------------------ |
 | `src/routeTree.gen.ts`          | `npm run build` (not `tsr generate` — it drops the Register block) |
-| `src/data/snapshot.json`        | `SHEET_ID=... npm run snapshot`                                    |
+| `src/data/snapshot.json`        | `SHEET_ID=... npm run snapshot` (the dev seed, not a fallback)     |
 | `docs/kozy-sheet-template.xlsx` | `python3 scripts/make-sheet-template.py`                           |
 | `package-lock.json`             | npm                                                                |
 
-The `.xlsx` is built from `snapshot.json`, so refresh the snapshot first. It
+The `.xlsx` is built from `snapshot.json`, so refresh the seed first. It
 ships formula-free on purpose: an unverifiable `#NAME?` in a client handover
 file is worse than no summary.
 
 ## #docs-language
 
-`docs/sop-client.md`, `docs/sheet-template.md`, and the `Panduan` tab of the
-workbook are written for the owner and stay Indonesian. `docs/harness/**`,
-`README.md`, and code comments are English. When UI copy changes, update the
-labels quoted inside the Indonesian docs so they still match the screen.
+The UI is Indonesian, and so is the client handover: `docs/sop-client.md`,
+`docs/sheet-template.md`, and the `Panduan` tab of the workbook. `docs/harness/**`,
+`README.md`, and code comments stay English (they are for developers). When UI
+copy changes, update the labels quoted inside the client docs so they still
+match the screen.

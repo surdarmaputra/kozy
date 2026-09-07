@@ -41,7 +41,7 @@ jobs:
         run: npm test
 
       # No SHEET_ID here on purpose: the build must succeed against the
-      # committed snapshot, which is the same path production falls back to.
+      # committed dev seed (source: 'seed'), the same path local dev uses.
       - name: Build
         run: npm run build
 
