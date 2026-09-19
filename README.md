@@ -15,12 +15,12 @@ admin panel.** There is no CMS and no database.
 
 2. **Fill in your data.** The spreadsheet has four tabs:
 
-   | Tab | Purpose |
-   |-----|---------|
-   | `config` | Brand name, tagline, default WhatsApp number, office address |
+   | Tab      | Purpose                                                        |
+   | -------- | -------------------------------------------------------------- |
+   | `config` | Brand name, tagline, default WhatsApp number, office address   |
    | `lokasi` | One row per location (slug, name, address, photos, facilities) |
-   | `kamar` | One row per physical room (code, floor, type, price, status) |
-   | `denah` | *(Optional)* Floor-plan grid layout |
+   | `kamar`  | One row per physical room (code, floor, type, price, status)   |
+   | `denah`  | _(Optional)_ Floor-plan grid layout                            |
 
    The `Panduan` tab inside the file explains every column in Indonesian.
 
@@ -70,12 +70,12 @@ git commit -am "chore: refresh dev seed"
 
 ### Environment variables
 
-| Variable       | Required in prod | Purpose |
-|----------------|------------------|---------|
-| `SHEET_ID`     | Yes | Google Sheet ID (see step 1.4) |
-| `PURGE_SECRET` | Yes | Secret for `/purge` — generate with `openssl rand -hex 24` |
-| `CACHE_DIR`    | No  | Directory for the last-good-copy file (default: `.cache/`) |
-| `NETLIFY_DEPLOYMENT` | No | Set `true` to enable Netlify edge emulator with `netlify dev` |
+| Variable             | Required in prod | Purpose                                                       |
+| -------------------- | ---------------- | ------------------------------------------------------------- |
+| `SHEET_ID`           | Yes              | Google Sheet ID (see step 1.4)                                |
+| `PURGE_SECRET`       | Yes              | Secret for `/purge` — generate with `openssl rand -hex 24`    |
+| `CACHE_DIR`          | No               | Directory for the last-good-copy file (default: `.cache/`)    |
+| `NETLIFY_DEPLOYMENT` | No               | Set `true` to enable Netlify edge emulator with `netlify dev` |
 
 ---
 
@@ -89,9 +89,9 @@ git commit -am "chore: refresh dev seed"
 2. **Add environment variables.** Site configuration → Environment variables →
    Add:
 
-   | Key | Value |
-   |-----|-------|
-   | `SHEET_ID` | from step 1.4 |
+   | Key            | Value                           |
+   | -------------- | ------------------------------- |
+   | `SHEET_ID`     | from step 1.4                   |
    | `PURGE_SECRET` | the random string you generated |
 
    Scope both to **all deploy contexts**. Redeploy after adding them.
@@ -131,13 +131,13 @@ npm run snapshot   # rewrite src/data/snapshot.json from the live Sheet
 
 ## Troubleshooting
 
-| Symptom | Fix |
-|---------|-----|
-| `/purge` says "Sheet unreachable" | Re-check File → Share → Anyone with the link, Viewer |
-| `/purge` says "could not be read" | Sheet never read successfully; fix sharing, then reload `/purge` |
-| `/purge` says "Purge not switched on" | `PURGE_SECRET` is unset — add it in Netlify and redeploy |
-| Edits take more than 2 minutes | Normal CDN window; open the purge bookmark for an instant refresh |
-| Rows silently missing | Failed validation — `/purge` lists the row numbers and reasons |
+| Symptom                               | Fix                                                               |
+| ------------------------------------- | ----------------------------------------------------------------- |
+| `/purge` says "Sheet unreachable"     | Re-check File → Share → Anyone with the link, Viewer              |
+| `/purge` says "could not be read"     | Sheet never read successfully; fix sharing, then reload `/purge`  |
+| `/purge` says "Purge not switched on" | `PURGE_SECRET` is unset — add it in Netlify and redeploy          |
+| Edits take more than 2 minutes        | Normal CDN window; open the purge bookmark for an instant refresh |
+| Rows silently missing                 | Failed validation — `/purge` lists the row numbers and reasons    |
 
 ---
 
