@@ -13,9 +13,8 @@ dist-ssr
 __unconfig*
 todos.json
 
-# Local Netlify folder
-.netlify
 
 __pycache__/
 
+# Local Vercel folder
 .vercel
