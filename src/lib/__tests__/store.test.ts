@@ -3,7 +3,7 @@ import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { lokasiSchema, parseRows } from '../schema'
-import { __resetStore, persist, recall } from '../store'
+import { __flushStore, __resetStore, persist, recall } from '../store'
 import type { Catalog } from '../schema'
 
 function fixture(overrides: Partial<Catalog> = {}): Catalog {
@@ -33,7 +33,7 @@ async function waitFor(predicate: () => boolean, ms = 1000): Promise<void> {
   throw new Error('condition not met in time')
 }
 
-const ENV_KEYS = ['CACHE_DIR', 'NETLIFY', 'NETLIFY_DEPLOYMENT'] as const
+const ENV_KEYS = ['CACHE_DIR', 'VERCEL'] as const
 
 describe('store', () => {
   let dir: string
@@ -47,7 +47,8 @@ describe('store', () => {
     __resetStore()
   })
 
-  afterEach(() => {
+  afterEach(async () => {
+    await __flushStore()
     rmSync(dir, { recursive: true, force: true })
     for (const key of ENV_KEYS) {
       if (saved[key] === undefined) delete process.env[key]

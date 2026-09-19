@@ -40,12 +40,13 @@ SHEET_ID=broken PURGE_SECRET=x node <serve dist/server/server.js>
 
 - no `SHEET_ID` renders every page from the dev seed (`source: 'seed'`)
 - a broken `SHEET_ID` with a warm `.cache/catalog.json` renders `source: 'cache'`;
-  clear `.cache/` (and no Blobs) and every catalogue route shows the friendly
-  unavailable page at HTTP 200 with `Cache-Control: no-store`
+  clear `.cache/` and a build with no baked snapshot shows the friendly
+  unavailable page at HTTP 200 with `Cache-Control: no-store` on every catalogue
+  route
 - `/purge` reports source, counts, and skipped rows in plain language — and
   "could not be read" when the Sheet is unreachable and nothing is saved
-- `Netlify-CDN-Cache-Control: s-maxage=60` and `Netlify-Cache-Tag` are on
-  catalogue routes that resolved to data
+- `Vercel-CDN-Cache-Control: max-age=60` is on catalogue routes that resolved to
+  data
 - no seed strings in `dist/client/assets/*.js`
 - the one light theme holds even with the OS set to dark, 390px and 1440px, no
   horizontal scroll

@@ -14,8 +14,8 @@ https://<your-domain>/purge?secret=<PURGE_SECRET>
 ```
 
 Bookmark this as "Refresh website". Opening it clears the cache so the next
-visitor sees the latest data at once. `PURGE_SECRET` is set in Netlify — see
-[step 3.4](#3-deploy-to-netlify).
+visitor sees the latest data at once. `PURGE_SECRET` is set in Vercel — see
+[step 3.4](#3-deploy-to-vercel).
 
 ---
 
@@ -83,23 +83,22 @@ git commit -am "chore: refresh dev seed"
 
 ### Environment variables
 
-| Variable             | Required in prod | Purpose                                                       |
-| -------------------- | ---------------- | ------------------------------------------------------------- |
-| `SHEET_ID`           | Yes              | Google Sheet ID (see step 1.4)                                |
-| `PURGE_SECRET`       | Yes              | Secret for `/purge` — generate with `openssl rand -hex 24`    |
-| `CACHE_DIR`          | No               | Directory for the last-good-copy file (default: `.cache/`)    |
-| `NETLIFY_DEPLOYMENT` | No               | Set `true` to enable Netlify edge emulator with `netlify dev` |
+| Variable       | Required in prod | Purpose                                                                                 |
+| -------------- | ---------------- | --------------------------------------------------------------------------------------- |
+| `SHEET_ID`     | Yes              | Google Sheet ID (see step 1.4)                                                          |
+| `PURGE_SECRET` | Yes              | Secret for `/purge` — generate with `openssl rand -hex 24`                              |
+| `CACHE_DIR`    | No               | Directory for the last-good-copy file (default: `.cache/`, `/tmp/kozy-cache` on Vercel) |
 
 ---
 
-## 3. Deploy to Netlify
+## 3. Deploy to Vercel
 
-1. **Connect the repo.** In Netlify: **Add new site → Import an existing project
-   → GitHub → pick this repo.** Accept the detected settings —
-   [`netlify.toml`](netlify.toml) already sets the build command and publish
-   directory.
+1. **Connect the repo.** In Vercel: **Add New → Project → Import** this repo.
+   Leave the framework preset as **Other** and accept the detected settings —
+   [`vercel.json`](vercel.json) already sets the build command, the output
+   directory and the SSR function route.
 
-2. **Add environment variables.** Site configuration → Environment variables →
+2. **Add environment variables.** Project Settings → Environment Variables →
    Add:
 
    | Key            | Value                           |
@@ -107,11 +106,15 @@ git commit -am "chore: refresh dev seed"
    | `SHEET_ID`     | from step 1.4                   |
    | `PURGE_SECRET` | the random string you generated |
 
-   Scope both to **all deploy contexts**. Redeploy after adding them.
+   Scope both to **Production, Preview and Development**. Redeploy after adding
+   them.
 
-3. **Deploy.** The SSR function and Netlify Blobs storage are wired up
-   automatically — nothing to configure. A green CI run on `main` triggers a
-   deploy.
+   `SHEET_ID` matters at build time as well as at runtime: the build bakes a
+   copy of the Sheet into the bundle so a cold instance still serves real data
+   if Google is unreachable.
+
+3. **Deploy.** The SSR function is wired up by `vercel.json` — nothing to
+   configure. Every push to `main` triggers a deploy.
 
 4. **Give the owner the purge bookmark.** Build this URL and send it to the
    owner as a "Refresh the website" bookmark:
@@ -120,13 +123,13 @@ git commit -am "chore: refresh dev seed"
    https://<your-domain>/purge?secret=<PURGE_SECRET>
    ```
 
-   Opening it clears the cache so a Sheet edit appears within seconds instead
-   of waiting up to two minutes.
+   Opening it clears the server cache and re-reads the Sheet, so an edit
+   appears within a minute instead of waiting up to two.
 
    Also open the `Panduan` tab in the Google Sheet and replace the placeholder
    purge URL there with the real URL above — the owner will find it directly
    in the sheet without having to ask. Update the secret text in that tab to
-   match the `PURGE_SECRET` you set in Netlify.
+   match the `PURGE_SECRET` you set in Vercel.
 
 5. **Verify.** Open `/purge?secret=...` and confirm it shows **Google Sheet
    (live)** and the location/room counts you expect.
@@ -153,7 +156,7 @@ npm run snapshot   # rewrite src/data/snapshot.json from the live Sheet
 | ------------------------------------- | ----------------------------------------------------------------- |
 | `/purge` says "Sheet unreachable"     | Re-check File → Share → Anyone with the link, Viewer              |
 | `/purge` says "could not be read"     | Sheet never read successfully; fix sharing, then reload `/purge`  |
-| `/purge` says "Purge not switched on" | `PURGE_SECRET` is unset — add it in Netlify and redeploy          |
+| `/purge` says "Purge not switched on" | `PURGE_SECRET` is unset — add it in Vercel and redeploy           |
 | Edits take more than 2 minutes        | Normal CDN window; open the purge bookmark for an instant refresh |
 | Rows silently missing                 | Failed validation — `/purge` lists the row numbers and reasons    |
 
@@ -161,6 +164,6 @@ npm run snapshot   # rewrite src/data/snapshot.json from the live Sheet
 
 ## Stack
 
-TanStack Start · Tailwind v4 · shadcn/ui · Zod · Netlify Functions + Blobs
+TanStack Start · Tailwind v4 · shadcn/ui · Zod · Vercel Functions
 
 See [`AGENTS.md`](AGENTS.md) for the development contract and guardrail ladder.

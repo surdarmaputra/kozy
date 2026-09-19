@@ -17,3 +17,5 @@ todos.json
 .netlify
 
 __pycache__/
+
+.vercel
