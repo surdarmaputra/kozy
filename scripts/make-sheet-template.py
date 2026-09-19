@@ -238,7 +238,7 @@ r = section(r, 'Link penting')
 for label, text in (
     (
         'Perbarui website',
-        'https://namawebsite.netlify.app/purge?secret=GANTI_INI\n'
+        'https://namawebsite.vercel.app/purge?secret=GANTI_INI\n'
         'Ganti namawebsite dan GANTI_INI dengan URL dan rahasia yang diberikan developer. '
         'Simpan sebagai bookmark. Buka link ini setiap kali mengubah data di Sheet supaya perubahan langsung muncul. '
         'Tanpa dibuka pun perubahan muncul sendiri dalam 1–2 menit.',
