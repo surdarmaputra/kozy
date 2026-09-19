@@ -4,6 +4,19 @@ A multi-location room catalogue. Availability is read from a Google Sheet at
 request time and served as SSR HTML cached at the CDN edge. **The Sheet is the
 admin panel.** There is no CMS and no database.
 
+### How sheet edits take effect
+
+Edit a cell in the Sheet → save → the site catches up automatically in about
+**1–2 minutes**. If you need it live immediately, open the purge URL:
+
+```
+https://<your-domain>/purge?secret=<PURGE_SECRET>
+```
+
+Bookmark this as "Refresh website". Opening it clears the cache so the next
+visitor sees the latest data at once. `PURGE_SECRET` is set in Netlify — see
+[step 3.4](#3-deploy-to-netlify).
+
 ---
 
 ## 1. Prepare the Google Sheet
@@ -109,6 +122,11 @@ git commit -am "chore: refresh dev seed"
 
    Opening it clears the cache so a Sheet edit appears within seconds instead
    of waiting up to two minutes.
+
+   Also open the `Panduan` tab in the Google Sheet and replace the placeholder
+   purge URL there with the real URL above — the owner will find it directly
+   in the sheet without having to ask. Update the secret text in that tab to
+   match the `PURGE_SECRET` you set in Netlify.
 
 5. **Verify.** Open `/purge?secret=...` and confirm it shows **Google Sheet
    (live)** and the location/room counts you expect.
