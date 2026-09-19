@@ -24,12 +24,7 @@ function savedCatalog(): Catalog {
   }
 }
 
-const ENV_KEYS = [
-  'SHEET_ID',
-  'CACHE_DIR',
-  'NETLIFY',
-  'NETLIFY_DEPLOYMENT',
-] as const
+const ENV_KEYS = ['SHEET_ID', 'CACHE_DIR', 'VERCEL'] as const
 
 describe('getCatalog', () => {
   let dir: string

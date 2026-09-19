@@ -33,7 +33,7 @@ export const purgeSheetCache = createServerFn({ method: 'GET' })
         ok: false,
         message: 'Fitur perbarui belum diaktifkan',
         detail:
-          'Variabel PURGE_SECRET masih kosong di Netlify. Minta developer mengisinya sekali, setelah itu halaman ini berfungsi.',
+          'Variabel PURGE_SECRET masih kosong di Vercel. Minta developer mengisinya sekali, setelah itu halaman ini berfungsi.',
       }
     }
 
@@ -47,16 +47,6 @@ export const purgeSheetCache = createServerFn({ method: 'GET' })
     }
 
     clearCatalogCache()
-
-    let cdnError = ''
-    try {
-      const { purgeCache } = await import('@netlify/functions')
-      await purgeCache({ tags: ['sheet'] })
-    } catch (error) {
-      // Local dev has no Netlify cache to purge. The in-process cache above is
-      // already cleared, which is the whole job outside production.
-      cdnError = error instanceof Error ? error.message : String(error)
-    }
 
     // Re-read straight away so the page can report what the Sheet actually
     // returned, not just that a cache was dropped.
@@ -78,20 +68,11 @@ export const purgeSheetCache = createServerFn({ method: 'GET' })
       skipped: catalog.skipped,
     }
 
-    if (cdnError) {
-      return {
-        ok: true,
-        message: 'Cache lokal dibersihkan',
-        detail: `Tidak ada cache CDN yang terjangkau di lingkungan ini (${cdnError}).`,
-        diagnostics,
-      }
-    }
-
     return {
       ok: true,
       message: 'Website sudah diperbarui',
       detail:
-        'Buka halaman lokasi lalu tarik ke bawah untuk menyegarkan. Perubahannya langsung terlihat.',
+        'Buka halaman lokasi lalu tarik ke bawah untuk menyegarkan. Perubahannya terlihat dalam waktu satu menit.',
       diagnostics,
     }
   })

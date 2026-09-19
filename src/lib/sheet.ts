@@ -59,28 +59,53 @@ function toConfig(
   }
 }
 
-/** Sample data shipped in the repo. Rendered only when SHEET_ID is unset (local
- *  dev, the CI build). Never a fallback for a failed fetch — a real outage shows
- *  the last good copy or a friendly unavailable page instead. Loaded lazily so
- *  the JSON stays out of the hot server bundle. */
-async function seedCatalog(skipped: Array<string>): Promise<Catalog> {
-  const { default: seed } = await import('../data/snapshot.json', {
-    with: { type: 'json' },
-  })
-  const raw = seed as {
-    config: Array<Record<string, string>>
-    lokasi: Array<Record<string, string>>
-    kamar: Array<Record<string, string>>
-    denah?: Array<Record<string, string>>
-  }
+type RawTabs = {
+  config: Array<Record<string, string>>
+  lokasi: Array<Record<string, string>>
+  kamar: Array<Record<string, string>>
+  denah?: Array<Record<string, string>>
+}
+
+function recordsToCatalog(
+  raw: RawTabs,
+  source: Catalog['source'],
+  skipped: Array<string>,
+): Catalog {
   return {
     config: toConfig(raw.config, skipped),
     lokasi: parseRows(lokasiSchema, raw.lokasi, 'lokasi', skipped),
     kamar: parseRows(kamarSchema, raw.kamar, 'kamar', skipped),
     denah: parseRows(denahRowSchema, raw.denah ?? [], 'denah', skipped),
-    source: 'seed',
+    source,
     fetchedAt: new Date().toISOString(),
     skipped,
+  }
+}
+
+/** Sample data shipped in the repo. Rendered only when SHEET_ID is unset (local
+ *  dev, the CI build). Never a fallback for a failed fetch — inventing rooms is
+ *  worse than an honest unavailable page. Loaded lazily so the JSON stays out of
+ *  the hot server bundle. */
+async function seedCatalog(skipped: Array<string>): Promise<Catalog> {
+  const { default: seed } = await import('../data/snapshot.json', {
+    with: { type: 'json' },
+  })
+  return recordsToCatalog(seed, 'seed', skipped)
+}
+
+/** The Sheet as it read at build time, inlined into the server bundle by the
+ *  `build-snapshot` plugin in vite.config.ts. Null unless that build actually
+ *  reached the Sheet, so the sample seed can never leak here. Last resort only:
+ *  it is real data, but only as fresh as the last deploy. */
+async function bakedCatalog(skipped: Array<string>): Promise<Catalog | null> {
+  try {
+    const { default: baked } = await import('virtual:build-snapshot')
+    if (!baked) return null
+    const catalog = recordsToCatalog(baked, 'cache', skipped)
+    return catalog.lokasi.length > 0 ? catalog : null
+  } catch {
+    // No build ran this module through the plugin, so there is nothing baked.
+    return null
   }
 }
 
@@ -116,8 +141,8 @@ async function readCatalog(): Promise<Catalog> {
 }
 
 /** One fetch per tab per TTL regardless of traffic. On failure: the last
- *  in-memory copy, then the persisted copy from disk/Blobs, then null so the
- *  route can render a friendly unavailable page. */
+ *  in-memory copy, the persisted copy from disk, the snapshot baked at build
+ *  time, then null so the route can render a friendly unavailable page. */
 export async function getCatalog(): Promise<Catalog | null> {
   const now = Date.now()
   if (cache && cache.expiresAt > now) return cache.catalog
@@ -134,12 +159,18 @@ export async function getCatalog(): Promise<Catalog | null> {
       cache = { catalog: cache.catalog, expiresAt: now + TTL_MS }
       return cache.catalog
     }
-    // Cold instance mid-outage: pull the last good copy off disk/Blobs and cache
-    // it so that cost is paid once per TTL, not per request.
+    // Cold instance mid-outage: pull the last good copy off disk and cache it so
+    // that cost is paid once per TTL, not per request.
     const recalled = await recall()
     if (recalled) {
       cache = { catalog: recalled, expiresAt: now + TTL_MS }
       return recalled
+    }
+    // Nothing saved on this instance: fall back to the copy baked at deploy.
+    const baked = await bakedCatalog([])
+    if (baked) {
+      cache = { catalog: baked, expiresAt: now + TTL_MS }
+      return baked
     }
     return null
   }

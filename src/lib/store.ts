@@ -1,8 +1,10 @@
 /** Persists the last catalogue we read successfully so a Sheet outage serves
- *  that copy instead of stale build-time data. Three backends, tried in order:
- *  in-process memory, a local file (`CACHE_DIR`, default `.cache/`), and Netlify
- *  Blobs (only when deployed). Every backend fails soft: a broken write or read
- *  degrades to the next one, never throws on the request path.
+ *  that copy instead of nothing. Two backends, tried in order: in-process
+ *  memory, then a local file (`CACHE_DIR`). Both fail soft: a broken write or
+ *  read degrades to the next one, never throws on the request path.
+ *
+ *  Neither survives a cold instance, which is what the build-time snapshot in
+ *  `sheet.ts` covers.
  *
  *  Server only. Imported by `sheet.ts`, never by a component. */
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
@@ -10,17 +12,16 @@ import { join } from 'node:path'
 import type { Catalog } from './schema'
 
 type Backend = {
-  name: 'memory' | 'file' | 'blob'
+  name: 'memory' | 'file'
   load: () => Promise<Catalog | null>
   save: (catalog: Catalog) => Promise<void>
 }
 
-const cacheDir = () => process.env.CACHE_DIR ?? '.cache'
+// Vercel's filesystem is read-only apart from /tmp, which survives warm
+// invocations of the same instance but not a cold one.
+const cacheDir = () =>
+  process.env.CACHE_DIR ?? (process.env.VERCEL ? '/tmp/kozy-cache' : '.cache')
 const catalogFile = () => join(cacheDir(), 'catalog.json')
-
-// Same switch as vite.config.ts: Blobs is a Netlify-only backend.
-const onNetlify = () =>
-  process.env.NETLIFY_DEPLOYMENT === 'true' || Boolean(process.env.NETLIFY)
 
 let lastGood: Catalog | null = null
 
@@ -52,49 +53,17 @@ const file: Backend = {
   },
 }
 
-async function blobStore() {
-  if (!onNetlify()) return null
-  try {
-    const { getStore } = await import('@netlify/blobs')
-    return getStore('catalog')
-  } catch {
-    // Not running inside a Netlify function — no blob context to bind to.
-    return null
-  }
-}
+const backends: Array<Backend> = [memory, file]
 
-const blob: Backend = {
-  name: 'blob',
-  load: async () => {
-    const store = await blobStore()
-    if (!store) return null
-    try {
-      const raw = await store.get('catalog.json', { type: 'text' })
-      return raw ? (JSON.parse(raw) as Catalog) : null
-    } catch {
-      return null
-    }
-  },
-  save: async (catalog) => {
-    const store = await blobStore()
-    if (!store) return
-    try {
-      await store.setJSON('catalog.json', catalog)
-    } catch {
-      // transient Blobs error — memory and file already hold this copy.
-    }
-  },
-}
-
-const backends: Array<Backend> = [memory, file, blob]
+let flushing: Promise<unknown> = Promise.resolve()
 
 /** Fire-and-forget. Sets the in-memory copy synchronously, then flushes the
  *  slower backends without blocking the response. */
 export function persist(catalog: Catalog): void {
   lastGood = catalog
-  for (const backend of backends) {
-    void backend.save(catalog).catch(() => undefined)
-  }
+  flushing = Promise.all(
+    backends.map((backend) => backend.save(catalog).catch(() => undefined)),
+  )
 }
 
 /** First backend holding a usable copy wins. Stamps `source: 'cache'` so the
@@ -113,4 +82,10 @@ export async function recall(): Promise<Catalog | null> {
 /** Test seam: drop the in-memory copy. */
 export function __resetStore(): void {
   lastGood = null
+}
+
+/** Test seam: settle writes still in flight, so one test's `persist` cannot
+ *  land in the next test's `CACHE_DIR`. */
+export async function __flushStore(): Promise<void> {
+  await flushing
 }

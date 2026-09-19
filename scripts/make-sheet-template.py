@@ -234,6 +234,19 @@ put(
 ws.merge_cells('B3:C3')
 
 r = 5
+r = section(r, 'Link penting')
+for label, text in (
+    (
+        'Perbarui website',
+        'https://namawebsite.vercel.app/purge?secret=GANTI_INI\n'
+        'Ganti namawebsite dan GANTI_INI dengan URL dan rahasia yang diberikan developer. '
+        'Simpan sebagai bookmark. Buka link ini setiap kali mengubah data di Sheet supaya perubahan langsung muncul. '
+        'Tanpa dibuka pun perubahan muncul sendiri dalam 1–2 menit.',
+    ),
+):
+    r = step(r, label, text)
+r += 1
+
 r = section(r, 'Tab yang dibaca website')
 for name, text in (
     ('config', 'Nama properti, kalimat perkenalan, nomor WhatsApp utama, dan alamat kantor.'),

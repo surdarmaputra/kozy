@@ -57,7 +57,7 @@ saved before this tab existed has no `denah` key — read it as `catalog.denah ?
 
 ## #resilience
 
-Four layers. All must keep working; a change that weakens one is a regression
+Five layers. All must keep working; a change that weakens one is a regression
 even when tests pass. The guiding rule: **a stale-but-real copy beats an error,
 and an honest error beats wrong data.**
 
@@ -67,15 +67,21 @@ and an honest error beats wrong data.**
 2. **Last good copy.** Fetch failure, revoked sharing, non-CSV response, or an
    empty `lokasi` tab → the last catalogue that was read successfully, from
    `src/lib/store.ts`: in-process memory, then a file under `CACHE_DIR`
-   (default `.cache/`), then Netlify Blobs (only when
-   `NETLIFY_DEPLOYMENT === 'true' || NETLIFY`). Served with `source: 'cache'`.
-   `store.persist()` writes all three on every successful fetch;
+   (default `.cache/`, `/tmp/kozy-cache` on Vercel). Served with
+   `source: 'cache'`. `store.persist()` writes both on every successful fetch;
    `clearCatalogCache()` (a `/purge`) never evicts them.
-3. **Friendly unavailable page.** Nothing has ever been read successfully (a
-   cold instance mid-outage, or a first deploy before the Sheet is shared) →
+3. **Build-time snapshot.** Neither survives a cold instance, so the
+   `build-snapshot` plugin in `vite.config.ts` reads the Sheet at build time and
+   inlines it into the server bundle as `virtual:build-snapshot`. Served with
+   `source: 'cache'`. It is emitted **only** when that build actually reached the
+   Sheet: with no `SHEET_ID`, or on a failed read, the module is `null`, so the
+   sample seed can never stand in for real inventory. As stale as the last
+   deploy.
+4. **Friendly unavailable page.** Nothing has ever been read successfully and no
+   snapshot was baked (a first deploy before the Sheet is shared) →
    `getCatalog()` returns `null` and each catalogue route renders
    `CatalogUnavailable` inside the normal shell at HTTP 200 with `no-store`.
-4. **Stale-while-revalidate.** The CDN serves the last good HTML during
+5. **Stale-while-revalidate.** The CDN serves the last good HTML during
    revalidation.
 
 `src/data/snapshot.json` is **not** a resilience layer. It is a dev seed,
@@ -90,7 +96,7 @@ traffic. Do not add a per-request fetch.
 ## #server-only
 
 `sheet.ts` reads `process.env.SHEET_ID` and dynamically imports the dev seed;
-`store.ts` uses `node:fs/promises` and `@netlify/blobs`. Neither may reach the
+`store.ts` uses `node:fs/promises`. Neither may reach the
 browser. `createServerFn` in `catalog.ts` strips the handler from the client
 bundle; importing `sheet.ts` or `store.ts` from a component defeats that.
 
@@ -105,10 +111,10 @@ npm run build && grep -l "Batam Centre" dist/client/assets/*.js   # must find no
 `loadCatalog` and `purgeSheetCache` in `src/lib/catalog.ts`. Route loaders call
 these, never `getCatalog` directly. `loadCatalog` resolves to `Catalog | null`
 (`null` = Sheet unreachable and no saved copy). `purgeSheetCache` validates its
-secret, clears the in-process cache (not the persisted copy), calls Netlify
-`purgeCache({ tags: ['sheet'] })`, then re-reads so `/purge` can report what the
-Sheet actually returned — including "could not be read" when the re-read is
-`null`.
+secret, clears the in-process cache (not the persisted copy), then re-reads so
+`/purge` can report what the Sheet actually returned — including "could not be
+read" when the re-read is `null`. There is no CDN purge: the edge copy carries a
+60-second TTL and ages out on its own.
 
 ## #routing
 
@@ -127,8 +133,7 @@ Every catalogue route returns `sheetCacheHeaders` from `src/lib/http.ts` when
 its loader resolved to data:
 
 ```
-Netlify-CDN-Cache-Control: s-maxage=60, stale-while-revalidate=86400
-Netlify-Cache-Tag: sheet
+Vercel-CDN-Cache-Control: max-age=60, stale-while-revalidate=86400
 Cache-Control: public, max-age=0, must-revalidate
 ```
 
@@ -137,8 +142,9 @@ When the loader resolved to `null` (the unavailable page) the route returns
 `headers: ({ loaderData }) => loaderData == null ? noStoreHeaders : sheetCacheHeaders`.
 
 `/purge` is the exception and sends `no-store` plus `X-Robots-Tag: noindex`.
-Route-level `headers()` does reach the response through the Netlify adapter;
-this was verified against the built SSR bundle, not assumed.
+Route-level `headers()` does reach the response through the Vercel adapter in
+`api/index.mjs`; this was verified by invoking the built SSR bundle, not
+assumed.
 
 ## #ci
 

@@ -1,10 +1,10 @@
 ---
 title: kozy
-stack: TanStack Start · Tailwind v4 · shadcn/ui · Zod · Vitest · Netlify
+stack: TanStack Start · Tailwind v4 · shadcn/ui · Zod · Vitest · Vercel
 ---
 
 A multi-location room catalogue. Availability is read from a Google Sheet at
-request time, server-rendered, cached at Netlify's CDN. The owner edits the
+request time, server-rendered, cached at Vercel's CDN. The owner edits the
 Sheet from a phone; nothing here redeploys. **The Sheet is the admin panel.**
 
 ## The loop
@@ -43,6 +43,7 @@ Diff-driven. Load ONLY sections matching changed paths, never a whole doc.
 | `docs/**`                                    | conventions.md · #docs-language                               |
 | any new `src/lib/*.ts`                       | testing.md · #unit                                            |
 | `.github/workflows/**`                       | architecture.md · #ci                                         |
+| `vercel.json` · `api/**` · `vite.config.ts`  | architecture.md · #caching #resilience                        |
 
 ## Guardrails
 
@@ -76,13 +77,15 @@ display label in exactly one place, `statusLabel` in
 **A bad row never blanks a page, but wrong data is worse than none.** Rows
 validate one at a time; a failure is skipped and reported at `/purge`, never
 thrown. On a failed fetch: skip-row → last good copy (`src/lib/store.ts`:
-memory → `CACHE_DIR` file → Netlify Blobs) → a friendly unavailable page at
-HTTP 200 → CDN stale-while-revalidate. The committed `snapshot.json` is **not**
-in this chain — it is a dev seed, rendered only when `SHEET_ID` is unset.
+memory → `CACHE_DIR` file) → the snapshot baked at build time
+(`virtual:build-snapshot`) → a friendly unavailable page at HTTP 200 → CDN
+stale-while-revalidate. The baked snapshot is real Sheet data, emitted only when
+the build actually read the Sheet. The committed `snapshot.json` is **not** in
+this chain — it is sample data, rendered only when `SHEET_ID` is unset.
 
 **`src/lib/sheet.ts` and `src/lib/store.ts` are server-only.** `sheet.ts`
-carries the fetch and the dev-seed import; `store.ts` carries the file and
-Netlify Blobs persistence. Components import selectors from `src/lib/select.ts`
+carries the fetch and the dev-seed import; `store.ts` carries the file
+persistence. Components import selectors from `src/lib/select.ts`
 instead. Check after changing any of them:
 `grep -l "Pogung\|Batam Centre" dist/client/assets/*.js` must find nothing.
 
@@ -106,7 +109,7 @@ src/
 │   ├── csv.ts       RFC 4180 parser (gviz quotes fields)
 │   ├── schema.ts    zod row schemas + per-row parse
 │   ├── sheet.ts     SERVER ONLY: fetch, 60s cache, last-good fallback
-│   ├── store.ts     SERVER ONLY: last-good persistence (memory/file/Blobs)
+│   ├── store.ts     SERVER ONLY: last-good persistence (memory/file)
 │   ├── select.ts    pure selectors, safe to import anywhere
 │   ├── catalog.ts   server fns (loadCatalog, purgeSheetCache)
 │   └── http.ts      sheetCacheHeaders, noStoreHeaders
@@ -119,6 +122,7 @@ docs/                 client handover (Indonesian) + harness/ (English)
 
 - `#/*` → `src/*` (package.json imports + tsconfig paths). `@/*` also resolves.
 - Build runs without `SHEET_ID` on purpose and serves the dev seed (`source: 'seed'`). Keep it that way.
+- With `SHEET_ID` set, the build also bakes the Sheet into `virtual:build-snapshot` as the last-resort fallback. A failed read warns and bakes `null`; it never fails the build.
 - `/purge` needs `PURGE_SECRET`; without it the page says so rather than 500ing.
 - One light theme only. No dark mode, no `prefers-color-scheme` override, no class, no JS, no toggle.
 - `devtools()` stays first in `vite.config.ts`.

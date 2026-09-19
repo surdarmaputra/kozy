@@ -12,7 +12,7 @@ export const Route = createFileRoute('/purge')({
   loader: ({ deps }) => purgeSheetCache({ data: { secret: deps.secret } }),
   headers: () => ({
     'Cache-Control': 'no-store',
-    'Netlify-CDN-Cache-Control': 'no-store',
+    'Vercel-CDN-Cache-Control': 'no-store',
     'X-Robots-Tag': 'noindex',
   }),
   head: () => ({
